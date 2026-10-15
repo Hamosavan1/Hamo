@@ -216,6 +216,7 @@ private fun machineIconFor(brandName: String?, modelName: String): Int? {
         b.contains("BFT", true) && m.contains("DEIMOS", true) -> R.drawable.ic_machine_bft_deimos
         b.contains("Marantec", true) && (m.contains("360", true) || m.contains("370", true) || m.contains("380", true)) -> R.drawable.ic_machine_marantec_comfort360
         b.contains("Marantec", true) && m.contains("Comfort", true) -> R.drawable.ic_machine_marantec_comfort
+        b.contains("CAME", true) && m.contains("V6000", true) -> R.drawable.ic_machine_came_v6000
         else -> null
     }
 }
