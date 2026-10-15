@@ -62,7 +62,7 @@ class DataTest {
 
     private fun ok(o: Outcome): Long { assertTrue("expected Ok but was $o", o is Outcome.Ok); return (o as Outcome.Ok).id }
 
-    @Test fun categoryBrandModelCrudAndRelations() = runBlocking {
+    @Test fun categoryBrandModelCrudAndRelations() = runBlocking<Unit> {
         val cat = ok(repo.saveCategory(DoorCategory(name = "أبواب زجاجية")))
         val brand = ok(repo.saveBrand(Brand(name = "شركة تجربة")))
         val model = ok(repo.saveModel(MachineModel(brandId = brand, categoryId = cat, name = "M-1")))
@@ -78,7 +78,7 @@ class DataTest {
         assertTrue(repo.brandsOnce().isEmpty())
     }
 
-    @Test fun faultCrudWithSymptomsCodesSolutionsAndSteps() = runBlocking {
+    @Test fun faultCrudWithSymptomsCodesSolutionsAndSteps() = runBlocking<Unit> {
         val id = ok(repo.saveFault(FaultDraft(
             fault = Fault(title = "الباب لا يغلق"),
             symptoms = listOf("يتوقف في المنتصف"),
@@ -97,11 +97,11 @@ class DataTest {
         assertEquals(null, repo.faultFullOnce(id))
     }
 
-    @Test fun faultWithoutTitleIsRejected() = runBlocking {
+    @Test fun faultWithoutTitleIsRejected() = runBlocking<Unit> {
         assertTrue(repo.saveFault(FaultDraft(Fault(title = " "))) is Outcome.Fail)
     }
 
-    @Test fun guideJobPartsFavoritesAndMedia() = runBlocking {
+    @Test fun guideJobPartsFavoritesAndMedia() = runBlocking<Unit> {
         val g = ok(repo.saveGuide(GuideDraft(TechnicalGuide(type = GuideType.INSTALL, title = "تركيب"), listOf("أ", "ب"))))
         assertEquals(2, repo.guideFullOnce(g)!!.steps.size)
         val part = ok(repo.savePart(SparePart(name = "ريموت", quantity = 3)))
@@ -127,7 +127,7 @@ class DataTest {
         ok(repo.deleteGuide(g))
     }
 
-    @Test fun seedMeetsRequirementsAndSearchWorksOffline() = runBlocking {
+    @Test fun seedMeetsRequirementsAndSearchWorksOffline() = runBlocking<Unit> {
         SeedData.populate(repo)
         assertTrue(repo.categoriesOnce().size >= 7)
         assertTrue(repo.faults.first().size >= 15)
@@ -142,7 +142,7 @@ class DataTest {
         assertTrue(repo.jobs.first().isEmpty())
     }
 
-    @Test fun backupExportInspectImportAndCorruptFile() = runBlocking {
+    @Test fun backupExportInspectImportAndCorruptFile() = runBlocking<Unit> {
         SeedData.populate(repo)
         ok(repo.saveFault(FaultDraft(Fault(title = "عطل خاص بي"))))
         val out = ByteArrayOutputStream()
