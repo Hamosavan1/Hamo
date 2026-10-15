@@ -35,6 +35,7 @@ import com.hamo.doortech.AppContainer
 import com.hamo.doortech.ui.components.LocalContainer
 import com.hamo.doortech.ui.components.LocalMessenger
 import com.hamo.doortech.ui.components.Messenger
+import com.hamo.doortech.ui.screens.AiSearchScreen
 import com.hamo.doortech.ui.screens.BackupScreen
 import com.hamo.doortech.ui.screens.BrandsScreen
 import com.hamo.doortech.ui.screens.CategoriesScreen
@@ -72,6 +73,7 @@ object Routes {
     const val MEDIA = "media"
     const val BACKUP = "backup"
     const val SETTINGS = "settings"
+    const val AI = "ai_search?q={q}"
 
     const val MODEL = "model/{id}"
     const val MODEL_EDIT = "model_edit/{id}?brand={brand}"
@@ -84,6 +86,7 @@ object Routes {
     const val JOB = "job/{id}"
     const val JOB_EDIT = "job_edit/{id}"
 
+    fun ai(q: String = "") = "ai_search?q=${android.net.Uri.encode(q)}"
     fun model(id: Long) = "model/$id"
     fun modelEdit(id: Long, brand: Long = 0) = "model_edit/$id?brand=$brand"
     fun fault(id: Long) = "fault/$id"
@@ -164,6 +167,9 @@ fun HamoRoot(container: AppContainer) {
                 composable(Routes.MEDIA) { MediaLibraryScreen(nav) }
                 composable(Routes.BACKUP) { BackupScreen(nav) }
                 composable(Routes.SETTINGS) { SettingsScreen(nav) }
+                composable(Routes.AI, listOf(navArgument("q") { type = NavType.StringType; defaultValue = "" })) {
+                    AiSearchScreen(nav, it.arguments?.getString("q") ?: "")
+                }
 
                 composable(Routes.MODEL, idArg) { ModelDetailScreen(nav, it.arguments?.getLong("id") ?: 0L) }
                 composable(

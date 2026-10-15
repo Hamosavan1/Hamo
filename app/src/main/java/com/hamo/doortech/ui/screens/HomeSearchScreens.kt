@@ -76,6 +76,7 @@ import com.hamo.doortech.ui.components.ListCard
 import com.hamo.doortech.ui.components.LoadingBox
 import com.hamo.doortech.ui.components.LocalContainer
 import com.hamo.doortech.ui.components.PrimaryButton
+import com.hamo.doortech.ui.components.SecondaryButton
 import com.hamo.doortech.ui.components.SeedBadge
 import com.hamo.doortech.ui.components.VerificationBadge
 import com.hamo.doortech.ui.components.goTop
@@ -292,9 +293,16 @@ fun SearchScreen(nav: NavController, diagnose: Boolean) {
                         EmptyState(
                             if (diagnose) "لا يوجد تطابق موثّق" else "لا توجد نتائج",
                             if (diagnose) "لم نجد عطلًا مطابقًا. حدّد الشركة والموديل أو صف المشكلة بكلمات أخرى، أو أضف العطل لقاعدة بياناتك." else "جرّب كلمات أخرى أو أزل بعض عوامل التصفية.",
-                            action = if (diagnose) ({
-                                PrimaryButton("إضافة عطل جديد", { nav.navigate(Routes.faultEdit(0, vm.modelId ?: 0)) })
-                            }) else null,
+                            action = {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    if (vm.query.isNotBlank()) {
+                                        PrimaryButton("ابحث عنها في الإنترنت (ذكاء اصطناعي)", { nav.navigate(Routes.ai(vm.query)) })
+                                    }
+                                    if (diagnose) {
+                                        SecondaryButton("إضافة عطل جديد", { nav.navigate(Routes.faultEdit(0, vm.modelId ?: 0)) })
+                                    }
+                                }
+                            },
                         )
                     } else {
                         LazyColumn(

@@ -96,6 +96,7 @@ private val moreEntries = listOf(
     MoreEntry("التوصيلات الكهربائية", "قواعد وملاحظات التوصيل", Icons.Default.ElectricalServices, Routes.guides(GuideType.WIRING)),
     MoreEntry("إعدادات الريموت والحساسات", "الريموتات والخلايا والحساسات", Icons.Default.SettingsRemote, Routes.guides(GuideType.REMOTE)),
     MoreEntry("قطع الغيار", "مخزون وأرقام القطع", Icons.Default.Handyman, Routes.PARTS),
+    MoreEntry("بحث بالإنترنت (ذكاء اصطناعي)", "للمكينات غير الموجودة في قاعدتك", Icons.Default.Memory, Routes.ai()),
     MoreEntry("المفضلة", "العناصر التي حفظتها", Icons.Default.Bookmark, Routes.FAVORITES),
     MoreEntry("الصور والمرفقات", "كل المرفقات المحفوظة", Icons.Default.PhotoLibrary, Routes.MEDIA),
     MoreEntry("النسخ الاحتياطي والاستعادة", "تصدير واستيراد البيانات", Icons.Default.Backup, Routes.BACKUP),

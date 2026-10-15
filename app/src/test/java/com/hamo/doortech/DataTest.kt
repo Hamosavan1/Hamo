@@ -186,4 +186,16 @@ class DataTest {
         val hits = SearchEngine.search(repo.searchDocs(), "844")
         assertTrue(hits.isNotEmpty())
     }
+
+    @Test fun aiImportSavesUnverifiedAndNoDuplicates() = runBlocking<Unit> {
+        val r = com.hamo.doortech.data.ai.AiResult(true, "BrandZ", "Z-1", "ZB1", "230V", listOf("فوتوسيل"), listOf("طرف 1"),
+            listOf("خطوة"), listOf("حفظ"), listOf(com.hamo.doortech.data.ai.AiFault("t", "E1", "m")), "w", "")
+        ok(com.hamo.doortech.data.ai.AiImporter.save(repo, r, listOf("https://x.example/m.pdf"), null))
+        ok(com.hamo.doortech.data.ai.AiImporter.save(repo, r, listOf("https://x.example/m.pdf"), null))
+        val g = repo.guides.first()
+        assertEquals(3, g.size)
+        assertTrue(g.all { it.level == com.hamo.doortech.data.db.Verification.UNVERIFIED })
+        assertEquals(1, repo.faults.first().size)
+        assertTrue(com.hamo.doortech.data.ai.AiImporter.save(repo, r.copy(found = false), emptyList(), null) is Outcome.Fail)
+    }
 }

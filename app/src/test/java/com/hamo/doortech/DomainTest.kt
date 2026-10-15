@@ -55,3 +55,35 @@ class DomainTest {
         assertEquals(setOf(4L), SearchEngine.search(docs(), "", SearchFilter(types = setOf(SearchType.GUIDE))).map { it.doc.id }.toSet())
     }
 }
+
+class AiParseTest {
+    private val sample = """
+    {"content":[
+      {"type":"server_tool_use","name":"web_search"},
+      {"type":"web_search_tool_result","content":[{"type":"web_search_result","url":"https://example.com/manual.pdf","title":"m"}]},
+      {"type":"text","text":"هذه النتيجة: {\"found\":true,\"brand\":\"X\",\"model\":\"M1\",\"controlUnit\":\"ZX\",\"specs\":\"230V\",\"sensors\":[\"فوتوسيل\"],\"wiring\":[\"طرف 1\"],\"programming\":[\"خطوة\"],\"remote\":\"أ\nب\",\"faults\":[{\"title\":\"t\",\"code\":\"E1\",\"meaning\":\"m\"}],\"warnings\":\"w\",\"notes\":\"\"} انتهى",
+       "citations":[{"url":"https://example.com/cite"}]}
+    ]}""".trimIndent()
+
+    @org.junit.Test fun parsesSuccess() {
+        val o = com.hamo.doortech.data.ai.AiSearchClient.parseResponse(sample)
+        org.junit.Assert.assertTrue(o is com.hamo.doortech.data.ai.AiOutcome.Success)
+        val s = o as com.hamo.doortech.data.ai.AiOutcome.Success
+        org.junit.Assert.assertEquals("M1", s.result.model)
+        org.junit.Assert.assertEquals(2, s.result.remote.size)
+        org.junit.Assert.assertEquals("E1", s.result.faults.single().code)
+        org.junit.Assert.assertTrue(s.sources.contains("https://example.com/manual.pdf"))
+        org.junit.Assert.assertTrue(s.sources.contains("https://example.com/cite"))
+    }
+
+    @org.junit.Test fun rejectsGarbage() {
+        org.junit.Assert.assertTrue(com.hamo.doortech.data.ai.AiSearchClient.parseResponse("nope") is com.hamo.doortech.data.ai.AiOutcome.Failure)
+        org.junit.Assert.assertTrue(com.hamo.doortech.data.ai.AiSearchClient.parseResponse("""{"content":[{"type":"text","text":"بدون json"}]}""") is com.hamo.doortech.data.ai.AiOutcome.Failure)
+    }
+
+    @org.junit.Test fun requestIsWellFormed() {
+        val j = com.google.gson.JsonParser.parseString(com.hamo.doortech.data.ai.AiSearchClient.buildRequest("m", "CAME BX-243")).asJsonObject
+        org.junit.Assert.assertEquals("web_search", j.getAsJsonArray("tools")[0].asJsonObject.get("name").asString)
+        org.junit.Assert.assertTrue(j.getAsJsonArray("messages")[0].asJsonObject.get("content").asString.contains("BX-243"))
+    }
+}

@@ -17,6 +17,12 @@ class AppContainer(context: Context) {
     val backup = BackupManager(repo)
     val pdf = JobReportPdf(appContext)
     private val prefs = appContext.getSharedPreferences("hamo_prefs", Context.MODE_PRIVATE)
+    val ai = com.hamo.doortech.data.ai.AiSearchClient()
+
+    /** مفتاح Claude API الخاص بالمستخدم، يُحفظ على الجهاز فقط ولا يدخل النسخ الاحتياطي. */
+    var aiKey: String
+        get() = prefs.getString("ai_key", "").orEmpty()
+        set(v) { prefs.edit().putString("ai_key", v.trim()).apply() }
 
     /** يحمّل البيانات التجريبية مرة واحدة فقط عند أول تشغيل على قاعدة فارغة. */
     suspend fun seedIfNeeded() {
