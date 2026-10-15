@@ -23,6 +23,10 @@ class AppContainer(context: Context) {
         if (prefs.getBoolean(KEY_SEEDED, false)) return
         if (!repo.hasAnyData()) SeedData.populate(repo)
         prefs.edit().putBoolean(KEY_SEEDED, true).apply()
+        if (!prefs.getBoolean(KEY_REF, false)) {
+            com.hamo.doortech.data.repo.ReferenceData.populate(repo)
+            prefs.edit().putBoolean(KEY_REF, true).apply()
+        }
     }
 
     /** يسمح بإعادة تحميل البيانات التجريبية بعد حذفها (من الإعدادات). */
@@ -34,5 +38,6 @@ class AppContainer(context: Context) {
 
     companion object {
         private const val KEY_SEEDED = "seed_done_v1"
+        private const val KEY_REF = "ref_sliding_v1"
     }
 }

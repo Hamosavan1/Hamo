@@ -23,6 +23,7 @@ import com.hamo.doortech.data.repo.GuideDraft
 import com.hamo.doortech.data.repo.InspectResult
 import com.hamo.doortech.data.repo.JobDraft
 import com.hamo.doortech.data.repo.Outcome
+import com.hamo.doortech.data.repo.ReferenceData
 import com.hamo.doortech.data.repo.SeedData
 import com.hamo.doortech.data.repo.SolutionDraft
 import com.hamo.doortech.domain.SearchEngine
@@ -169,5 +170,20 @@ class DataTest {
         assertTrue(BackupManager(repo).inspect(bad) is InspectResult.Invalid)
         val junk = File(ctx.cacheDir, "junk.zip").also { it.writeText("not a zip") }
         assertTrue(BackupManager(repo).inspect(junk) is InspectResult.Invalid)
+    }
+
+    @Test fun referenceDataLoadsOnceAndSurvivesSeedDeletion() = runBlocking<Unit> {
+        SeedData.populate(repo)
+        ReferenceData.populate(repo)
+        ReferenceData.populate(repo) // لا يكرر
+        val brands = repo.brandsOnce().filter { !it.isSeed }.map { it.name }
+        assertEquals(setOf("CAME", "FAAC", "Nice"), brands.toSet())
+        assertTrue(repo.modelsOnce().count { !it.isSeed } >= 4)
+        val before = repo.guides.first().count { !it.isSeed }
+        assertTrue(before >= 8)
+        ok(repo.deleteSeedData())
+        assertEquals(before, repo.guides.first().size)
+        val hits = SearchEngine.search(repo.searchDocs(), "844")
+        assertTrue(hits.isNotEmpty())
     }
 }
