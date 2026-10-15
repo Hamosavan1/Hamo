@@ -79,6 +79,23 @@ class MediaStore(private val context: Context) {
         target.outputStream().use { out -> input.copyTo(out) }
     }
 
+    /**
+     * ينسخ صورة مرفقة مع التطبيق (assets/...) إلى مخزن الوسائط، مرة واحدة فقط:
+     * لو الاسم المطلوب [preferredName] موجود بالفعل بنفس الحجم، بيرجّعه زي ما هو بدون نسخ تاني.
+     * بيُستخدم لزرع مخططات التوصيل الحقيقية من الكتالوجات مع بيانات ReferenceData.
+     */
+    fun copyFromAssets(assetPath: String, preferredName: String): String? {
+        val target = fileFor(preferredName)
+        return try {
+            if (target.exists() && target.length() > 0) return preferredName
+            context.assets.open(assetPath).use { input -> copyTo(input, target) }
+            preferredName
+        } catch (e: Exception) {
+            target.delete()
+            null
+        }
+    }
+
     private fun queryDisplayName(uri: Uri): String? = try {
         context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
             if (c.moveToFirst()) c.getString(0) else null

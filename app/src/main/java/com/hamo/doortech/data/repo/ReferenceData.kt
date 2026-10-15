@@ -5,6 +5,7 @@ import com.hamo.doortech.data.db.DoorCategory
 import com.hamo.doortech.data.db.Fault
 import com.hamo.doortech.data.db.GuideType
 import com.hamo.doortech.data.db.MachineModel
+import com.hamo.doortech.data.db.OwnerType
 import com.hamo.doortech.data.db.TechnicalGuide
 import com.hamo.doortech.data.db.Verification
 import kotlinx.coroutines.flow.first
@@ -46,6 +47,19 @@ object ReferenceData {
         suspend fun model(m: MachineModel): Long? {
             repo.modelsOnce().firstOrNull { it.brandId == m.brandId && it.name == m.name }?.let { return it.id }
             return (repo.saveModel(m) as? Outcome.Ok)?.id
+        }
+
+        /**
+         * يزرع صورة حقيقية (صورة المكينة أو صفحة مخطط توصيل ممسوحة من الكتالوج الأصلي)
+         * مرفقة داخل app/src/main/assets/diagrams كمرفق MediaAttachment لموديل أو دليل.
+         * آمن للتكرار: لو المرفق بنفس اسم الملف موجود بالفعل لنفس المالك، ميضيفوش تاني.
+         */
+        suspend fun img(ownerType: String, ownerId: Long?, assetFile: String) {
+            if (ownerId == null || ownerId == 0L) return
+            val fileName = "seed_$assetFile"
+            if (repo.mediaOnce(ownerType, ownerId).any { it.path == fileName }) return
+            if (repo.mediaStore.copyFromAssets("diagrams/$assetFile", fileName) == null) return
+            repo.addCameraImage(ownerType, ownerId, repo.mediaStore.fileFor(fileName))
         }
 
         val came = brand("CAME", "إيطاليا")
@@ -477,6 +491,25 @@ object ReferenceData {
             if (repo.guides.first().none { it.title == d.guide.title }) repo.saveGuide(d)
         }
 
+        // ======================= صور حقيقية من الكتالوجات (مخططات توصيل وصور مكينة) =======================
+        img(OwnerType.MODEL, bull, "bull_cover.png")
+        img(OwnerType.MODEL, bull, "bull_wiring_main.png")
+        img(OwnerType.MODEL, bull, "bull_wiring_aux.png")
+        img(OwnerType.MODEL, bm30, "roger_cover.png")
+        img(OwnerType.MODEL, bm30, "roger_board.png")
+        img(OwnerType.MODEL, bm30, "roger_remote.png")
+        img(OwnerType.MODEL, bm30, "roger_errors.png")
+        repo.guides.first().firstOrNull { it.title == "Beninca BULL ESA (لوحة CP.B24 ESA) — جدول الأطراف الكامل" }?.let {
+            img(OwnerType.GUIDE, it.id, "bull_wiring_main.png")
+            img(OwnerType.GUIDE, it.id, "bull_wiring_aux.png")
+        }
+        repo.guides.first().firstOrNull { it.title == "Roger BM30/HS (لوحة B70/1DC) — جدول الأطراف الكامل" }?.let {
+            img(OwnerType.GUIDE, it.id, "roger_board.png")
+        }
+        repo.guides.first().firstOrNull { it.title == "Roger BM30/HS — حفظ وحذف الريموت على مستقبل RX-2" }?.let {
+            img(OwnerType.GUIDE, it.id, "roger_remote.png")
+        }
+
         // ======================= أعطال ورموز موثقة =======================
         suspend fun fault(title: String, model: Long?, desc: String, alt: String, src: String, warn: String,
                           symptoms: List<String>, codes: List<CodeDraft>, solTitle: String, steps: List<String>) {
@@ -580,6 +613,9 @@ object ReferenceData {
                 "افصل التغذية قبل فحص أي توصيل، وأعد التغذية بعد التأكد من غلق كل الدوائر NC أو تعطيلها برمجيًا.",
                 "لا يمكن تحريك البوابة (فتح/إغلاق) طالما الرمز ليس 00 أو FA أو FC، بينما حالة حدّي الشوط (FA/FC) لا تمنع الحركة.",
             ))
+        repo.faults.first().firstOrNull { it.title == "Roger BM30/HS (لوحة B70/1DC) — رموز حالة الشاشة الكاملة" }?.let {
+            img(OwnerType.FAULT, it.id, "roger_errors.png")
+        }
         fault("Motorline MC50SC — إشارات الشاشة وLEDs", mc50,
             "الدليل لا يتضمن جدول أكواد مرقّمة؛ المذكور حالات وLEDs.", "MC50SC LI ER الشاشة، حد الفتح، الخلايا",
             SRC_MOTORLINE, W_GEN,
