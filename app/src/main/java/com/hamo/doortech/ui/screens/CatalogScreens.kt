@@ -1,20 +1,26 @@
 package com.hamo.doortech.ui.screens
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -30,10 +36,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.hamo.doortech.R
 import com.hamo.doortech.data.db.Brand
 import com.hamo.doortech.data.db.DoorCategory
 import com.hamo.doortech.data.db.MachineModel
@@ -192,6 +202,37 @@ fun BrandsScreen(nav: NavController) {
     }
 }
 
+/**
+ * أيقونة المكينة في القوائم: صورة حقيقية للمكينة نفسها (مقصوصة من صورة غلاف الكتالوج
+ * الرسمي للماركة/الموديل) لو متاحة، وإلا أيقونة عامة. أضِف سطرًا هنا كل ما تمت إضافة
+ * صورة غلاف جديدة (drawable) لموديل جديد في ReferenceData.
+ */
+private fun machineIconFor(brandName: String?, modelName: String): Int? {
+    val b = brandName.orEmpty()
+    val m = modelName
+    return when {
+        b.contains("Beninca", true) && m.contains("BULL", true) -> R.drawable.ic_machine_beninca_bull
+        b.contains("Roger", true) && (m.contains("BM30", true) || m.contains("BH30", true)) -> R.drawable.ic_machine_roger_bm30
+        else -> null
+    }
+}
+
+@Composable
+fun MachineIcon(brandName: String?, modelName: String, size: androidx.compose.ui.unit.Dp = 48.dp) {
+    val res = machineIconFor(brandName, modelName)
+    Box(
+        Modifier.size(size).padding(end = 12.dp).clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (res != null) {
+            Image(painterResource(res), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        } else {
+            Icon(Icons.Outlined.Build, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp))
+        }
+    }
+}
+
 @Composable
 fun ModelsScreen(nav: NavController) {
     val container = LocalContainer.current
@@ -232,6 +273,7 @@ fun ModelsScreen(nav: NavController) {
                             title = m.name.ltr(),
                             subtitle = listOfNotNull(n?.brands?.get(m.brandId), n?.category(m.categoryId)).joinToString(" • "),
                             badges = { if (m.isSeed) SeedBadge() },
+                            leading = { MachineIcon(brandName = n?.brands?.get(m.brandId), modelName = m.name) },
                             onClick = { nav.navigate(Routes.model(m.id)) },
                         )
                     }

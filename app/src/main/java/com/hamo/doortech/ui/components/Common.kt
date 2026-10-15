@@ -314,6 +314,7 @@ fun ListCard(
     subtitle: String = "",
     modifier: Modifier = Modifier,
     badges: @Composable () -> Unit = {},
+    leading: @Composable () -> Unit = {},
     trailing: @Composable () -> Unit = {},
     onClick: (() -> Unit)? = null,
 ) {
@@ -324,6 +325,7 @@ fun ListCard(
         shape = RoundedCornerShape(14.dp),
     ) {
         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            leading()
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(title, style = MaterialTheme.typography.titleMedium)
                 if (subtitle.isNotBlank()) {
