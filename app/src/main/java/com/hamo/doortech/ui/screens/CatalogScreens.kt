@@ -211,6 +211,7 @@ private fun machineIconFor(brandName: String?, modelName: String): Int? {
     val b = brandName.orEmpty()
     val m = modelName
     return when {
+        b.contains("Beninca", true) && m.contains("CP.BULL8", true) -> R.drawable.ic_machine_beninca_cpbull8om
         b.contains("Beninca", true) && m.contains("BULL", true) -> R.drawable.ic_machine_beninca_bull
         b.contains("Roger", true) && (m.contains("BM30", true) || m.contains("BH30", true)) -> R.drawable.ic_machine_roger_bm30
         b.contains("BFT", true) && m.contains("DEIMOS", true) -> R.drawable.ic_machine_bft_deimos
