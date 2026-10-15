@@ -1,0 +1,103 @@
+name: Android CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /opt/hostedtoolcache/CodeQL || true
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build debug APK
+        id: build
+        run: |
+          chmod +x gradlew
+          set +e
+          ./gradlew --no-daemon --console=plain assembleDebug > build.log 2>&1
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Report compile errors
+        if: steps.build.outputs.code != '0'
+        run: |
+          grep -E '^(e: |.*error:|> Task .* FAILED|FAILURE|\* What went wrong)' -A2 build.log | head -300 > errs.txt || true
+          python3 - <<'PY'
+          lines = open('errs.txt', encoding='utf-8', errors='replace').read().splitlines()
+          chunk = 6
+          for i in range(0, min(len(lines), 240), chunk):
+              msg = '%0A'.join(l.replace('%','%25').replace('\r','') for l in lines[i:i+chunk])
+              print(f"::error title=build-{i//chunk}::{msg}")
+          if not lines:
+              tail = open('build.log', encoding='utf-8', errors='replace').read().splitlines()[-30:]
+              print("::error title=build-tail::" + '%0A'.join(tail))
+          PY
+          exit 1
+
+      - name: Unit tests
+        id: tests
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain testDebugUnitTest > test.log 2>&1
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Report test results
+        run: |
+          python3 - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          total = fail = 0
+          out = []
+          for f in glob.glob('app/build/test-results/testDebugUnitTest/*.xml'):
+              r = ET.parse(f).getroot()
+              for tc in r.iter('testcase'):
+                  total += 1
+                  bad = tc.find('failure')
+                  if bad is None: bad = tc.find('error')
+                  if bad is not None:
+                      fail += 1
+                      txt = (bad.get('message') or '')[:300] + ' | ' + (bad.text or '')[:500]
+                      out.append(f"{tc.get('classname')}.{tc.get('name')}: {txt}")
+          print(f"::notice title=tests::total={total} failed={fail}")
+          for o in out[:20]:
+              print("::error title=test-fail::" + o.replace('%','%25').replace('\n','%0A').replace('\r',''))
+          if total == 0:
+              import re
+              lines = [l for l in open('test.log', encoding='utf-8', errors='replace').read().splitlines() if l.startswith('e: ') or 'FAILED' in l or 'What went wrong' in l]
+              print("::error title=tests-none::" + '%0A'.join(lines[:30]).replace('%','%25'))
+          PY
+
+      - name: Compile instrumented tests (not executed)
+        run: ./gradlew --no-daemon --console=plain assembleDebugAndroidTest > at.log 2>&1 || (grep -E '^e: ' at.log | head -20 | sed 's/^/::error::/'; exit 1)
+
+      - name: Fail if tests failed
+        if: steps.tests.outputs.code != '0'
+        run: exit 1
+
+      - name: Publish debug APK
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk hamo-door-tech-debug.apk
+          gh release create "debug-${{ github.run_number }}" hamo-door-tech-debug.apk \
+            --title "HAMO DOOR TECH debug #${{ github.run_number }}" \
+            --notes "Debug APK. Unit tests passed on CI; instrumented tests compiled only."
