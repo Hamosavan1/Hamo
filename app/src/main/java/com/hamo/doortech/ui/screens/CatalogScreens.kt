@@ -213,6 +213,7 @@ private fun machineIconFor(brandName: String?, modelName: String): Int? {
     return when {
         b.contains("Beninca", true) && m.contains("BULL", true) -> R.drawable.ic_machine_beninca_bull
         b.contains("Roger", true) && (m.contains("BM30", true) || m.contains("BH30", true)) -> R.drawable.ic_machine_roger_bm30
+        b.contains("BFT", true) && m.contains("DEIMOS", true) -> R.drawable.ic_machine_bft_deimos
         else -> null
     }
 }
