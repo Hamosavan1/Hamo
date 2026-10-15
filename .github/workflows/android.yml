@@ -86,7 +86,8 @@ jobs:
           PY
 
       - name: Compile instrumented tests (not executed)
-        run: ./gradlew --no-daemon --console=plain assembleDebugAndroidTest > at.log 2>&1 || (grep -E '^e: ' at.log | head -20 | sed 's/^/::error::/'; exit 1)
+        run: |
+          ./gradlew --no-daemon --console=plain assembleDebugAndroidTest > at.log 2>&1 || { grep -E '^e: ' at.log | head -20 | sed 's/^/::error::/'; exit 1; }
 
       - name: Fail if tests failed
         if: steps.tests.outputs.code != '0'
