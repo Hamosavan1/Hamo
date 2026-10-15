@@ -18,6 +18,9 @@ import kotlinx.coroutines.flow.first
  */
 object ReferenceData {
     const val CATEGORY = "البوابات المنزلقة"
+    const val CATEGORY_GARAGE = "مكينات أبواب الجراج العلوية"
+
+    private const val SRC_SOMFY_DEXXO = "كتالوج Somfy DEXXO PRO 800-1000 RTS (مقتطف فني): https://pdf.archiexpo.com/ja/pdf-en/somfy/dexxo-pro-800-1000-rts/3190-407029.html"
 
     private const val SRC_CAME = "دليل تركيب CAME BX-74/BX-78 (119RIBX041): https://doorentrydirect.com/media/product_attach_files/Installation_manual_119RIBX041.pdf"
     private const val SRC_FAAC = "دليل FAAC 844 ER: https://cdn.shopify.com/s/files/1/0671/3786/3920/files/844ER.pdf"
@@ -41,6 +44,13 @@ object ReferenceData {
         if (existing != null && existing.isSeed) repo.saveCategory(existing.copy(isSeed = false))
         val catId = existing?.id
             ?: (repo.saveCategory(DoorCategory(name = CATEGORY, description = "بوابات سيارات تنزلق أفقيًا.")) as? Outcome.Ok)?.id
+
+        // قسم ثانٍ مستقل: مكينات أبواب الجراج العلوية (Overhead Garage Door Openers) — لا يُخلط بموديلات البوابات المنزلقة أعلاه.
+        val existingGarage = repo.categoriesOnce().firstOrNull { it.name == CATEGORY_GARAGE }
+        if (existingGarage != null && existingGarage.isSeed) repo.saveCategory(existingGarage.copy(isSeed = false))
+        val catIdGarage = existingGarage?.id
+            ?: (repo.saveCategory(DoorCategory(name = CATEGORY_GARAGE, description = "مكينات أبواب الجراج التي تُفتح لأعلى (سكشنال أو قطعة واحدة).")) as? Outcome.Ok)?.id
+
         suspend fun brand(name: String, country: String): Long =
             repo.brandsOnce().firstOrNull { it.name == name }?.id
                 ?: ((repo.saveBrand(Brand(name = name, country = country)) as? Outcome.Ok)?.id ?: 0L)
@@ -182,12 +192,25 @@ object ReferenceData {
             notes = "البيانات من الدليل الرسمي الكامل (22 صفحة قسم إنجليزي) الذي رفعه المستخدم، وليست ملخصًا عامًا — راجع $SRC_BENINCA_BULL لأي تفصيل إضافي أو نسخة مختلفة من اللوحة.", source = SRC_BENINCA_BULL,
         ))
 
+        // ======================= قسم مكينات أبواب الجراج العلوية — Somfy DEXXO PRO =======================
+        // أول موديل في القسم الجديد، حسب طلب المستخدم بتغطية كل شركات الجراج (Somfy/Marantec/Life/...).
+        // المصدر مقتطف فني من كتالوج Somfy منشور على archiexpo — وليس الدليل الكامل، فمخططات التوصيل فيه صور لم يمكن استخراج نصها.
+        val somfy = brand("Somfy", "فرنسا")
+        val dexxoPro = model(MachineModel(
+            brandId = somfy, categoryId = catIdGarage, name = "DEXXO PRO 800 RTS / 800 3S RTS / 1000 RTS / 1000 3S RTS", controlUnit = "لوحة مدمجة بالمحرك (الاسم التجاري للوحة غير مذكور في المقتطف المتاح؛ راجع ملصق اللوحة نفسها)",
+            specs = "مشغّل جراج للأبواب التي تُفتح رأسيًا للاستخدام السكني، مطابق لمعيار EN 60335-2.95، ومصمَّم (عند التركيب وفق الدليل وقائمة الفحص الخاصة به) ليطابق EN 13241-1 وEN 12453. الفروق الدقيقة بين 800 وdocumentation 1000 وإصدارات 3S (ثلاثة أزرار) غير مفصَّلة في المقتطف المتاح — راجع الدليل الكامل أو ملصق المكينة لتحديد الطراز بدقة.",
+            remoteInfo = "يعمل بنظام Somfy RTS. خطوات حفظ الريموت لوضع «الفتح الكلي» مذكورة في فهرس الدليل لكن تفاصيلها لم تظهر في المقتطف المتاح — غير مذكورة هنا لتفادي الاختلاق.",
+            sensorsInfo = "ملحقات مدعومة حسب المخطط (Fig. 21): لمبة إنذار برتقالية، إضاءة لاسلكية، لوحة مفاتيح كودية، مفتاح مفتاحي، هوائي، بطارية احتياطية، طقم أمان لباب المشاة، خلايا فوتوسيل (عادية أو عاكسة Reflex)، حساس حافة، صفارة إنذار. افصل تغذية المحرك قبل العمل على أي ملحق.",
+            notes = "هذا أول موديل في قسم «$CATEGORY_GARAGE» الجديد — البيانات من مقتطف كتالوج وليس الدليل الرسمي الكامل؛ عدة قيم ومخططات التوصيل بالتفصيل «غير مذكورة» هنا عمدًا لأنها لم تظهر بوضوح في المصدر المتاح. مصدر الدليل الكامل الرسمي: service.somfy.com (الملف الفرنسي الوحيد الذي وُجد برابط مباشر؛ لم يُؤكَّد وجود نسخة إنجليزية بنفس الرابط).",
+            source = SRC_SOMFY_DEXXO,
+        ))
+
         // ======================= أدلة البرمجة =======================
         val guides = mutableListOf<GuideDraft>()
-        fun g(type: String, title: String, model: Long?, summary: String, warn: String, src: String, steps: List<String>) {
+        fun g(type: String, title: String, model: Long?, summary: String, warn: String, src: String, steps: List<String>, cat: Long? = catId) {
             guides += GuideDraft(
                 TechnicalGuide(
-                    type = type, title = title, categoryId = catId, modelId = model, summary = summary,
+                    type = type, title = title, categoryId = cat, modelId = model, summary = summary,
                     warnings = warn, source = src, level = Verification.DOCUMENTED,
                 ),
                 steps,
@@ -248,6 +271,32 @@ object ReferenceData {
                 "تعلّم عن بعد (بدون فتح اللوحة، شرط أن كود المرسل محفوظ بالفعل بالمستقبل): 1) اضغط الزر المخفي بالريموت المحفوظ مسبقًا 2) خلال 5 ثوانٍ اضغط زر الريموت المحفوظ المطابق للقناة المطلوبة 3) خلال 10 ثوانٍ اضغط الزر المخفي بالريموت الجديد 4) خلال 5 ثوانٍ اضغط زر الريموت الجديد المطلوب حفظه في نفس القناة — ينطفئ الفلاشر 5) يحفظ المستقبل الكود تلقائيًا ويخرج من وضع البرمجة.",
                 "تنبيه هام: لا يمكن تخزين ريموتات ARC وRolling-code معًا في نفس الذاكرة — لو أول ريموت محفوظ كان ARC فالباقي يجب أن يكون ARC فقط، وللتبديل استخدم rtr لمسح الذاكرة بالكامل أولًا.",
             ))
+
+        // ======================= Somfy DEXXO PRO RTS (قسم أبواب الجراج) =======================
+        g(GuideType.PROGRAMMING, "Somfy DEXXO PRO RTS — أزرار البرمجة والمعايرة الذاتية وجدول معاملات الإعداد", dexxoPro,
+            "من مقتطف الكتالوج الفني (صفحات أزرار PROG/SET وجدول معاملات الإعداد Fig. 31) — ليس الدليل الكامل، وبعض القيم لم تظهر بوضوح في المصدر فكُتبت «غير مذكورة».",
+            "$W_GEN اضغط SET لمدة 7 ثوانٍ يمسح المعايرة والإعدادات ويعيدها للمصنع بالكامل — لا تنفّذه إلا بقصد واضح. اضبط المعامل P9 قبل المعايرة الذاتية لو كان الباب من النوع المتأرجح (Swinging).",
+            SRC_SOMFY_DEXXO,
+            listOf(
+                "أزرار الشاشة: PROG لمدة 2 ثانية = حفظ ريموت جديد • PROG لمدة 7 ثوانٍ = مسح كل الريموتات المحفوظة • PROG لمدة نصف ثانية = الدخول لقائمة الإعداد أو الخروج منها.",
+                "SET لمدة 2 ثانية = بدء دورة المعايرة الذاتية (Self-learning) • SET لمدة 7 ثوانٍ = مسح المعايرة والإعدادات بالكامل وإعادتها لوضع المصنع.",
+                "قفل وضع الإعداد: اضغط SET أولًا، ثم + و- معًا خلال ثانيتين. كرر نفس الخطوات لإلغاء القفل.",
+                "مسح الريموتات: اضغط مع الاستمرار PROG حتى يومض الضوء (حوالي 7 ثوانٍ).",
+                "استعادة ضبط المصنع: اضغط مع الاستمرار SET حتى ينطفئ الضوء (حوالي 7 ثوانٍ) — يعيد كل القيم للافتراضي.",
+                "المعايرة الذاتية (تعلّم حدّي الشوط): لو كان الباب من نوع متأرجح (Swinging) غيّر المعامل P9 أولًا قبل البدء. اضغط SET حتى يضيء الضوء (2 ثانية) ثم ابدأ دورة التعلّم.",
+                "جدول معاملات الإعداد (Fig. 31) — P0 وضع التشغيل الكلي: 0 متتابع (Sequential) • 1 متتابع + إغلاق موقوت (Timed close) • 3 إغلاق تلقائي بواسطة الخلايا الفوتوسيلية.",
+                "لمبة التحذير البرتقالية: 0 بدون تحذير مسبق • 1 تحذير مسبق لمدة ثانيتين قبل الحركة.",
+                "مدخل الأمان: 0 غير مستخدم • 1 مع اختبار ذاتي (Self-test) • 2 بدون اختبار ذاتي.",
+                "حساسية كشف العوائق: 0-1 منخفضة • 2 قياسية (افتراضي عادة) • 3 عالية.",
+                "وضع التشغيل الجزئي (Partial): 0 متتابع • 1 متتابع + إغلاق موقوت.",
+                "سرعة الإغلاق: القيمة غير مذكورة في المقتطف المتاح.",
+                "مؤشر الصيانة: 0 معطّل • 1 إلى 99 (كل رقم × 100 دورة، حتى 9900 دورة).",
+                "كشف محاولة الفتح القسري (Forced-entry): 0 معطّل • 1 كشف واضح • 2 كشف أقل وضوحًا.",
+                "إجراء الأمان قبل الفتح (ADMAP): 0 بلا تأثير • 1 رفض الحركة.",
+                "إجراء الأمان أثناء الإغلاق: 1 توقف • 2 توقف + فتح جزئي للخلف • 3 فتح كامل للخلف.",
+                "إجراء العائق أثناء الإغلاق: 2 توقف + فتح جزئي للخلف • 3 فتح كامل للخلف.",
+                "ملاحظة دقة: زمن تأخير الإضاءة وبعض القيم الأخرى لم تكن واضحة بالكامل في المقتطف المتاح ولم تُكتب لتفادي الاختلاق — راجع الدليل الكامل أو شاشة اللوحة أمامك لتأكيدها.",
+            ), cat = catIdGarage)
 
         // ======================= BFT DEIMOS BT KIT UL (لوحة QSCD UL) =======================
         g(GuideType.WIRING, "BFT DEIMOS BT KIT UL — جدول الأطراف الكامل (Wiring Diagram)", deimosUl,
@@ -647,10 +696,10 @@ object ReferenceData {
 
         // ======================= أعطال ورموز موثقة =======================
         suspend fun fault(title: String, model: Long?, desc: String, alt: String, src: String, warn: String,
-                          symptoms: List<String>, codes: List<CodeDraft>, solTitle: String, steps: List<String>) {
+                          symptoms: List<String>, codes: List<CodeDraft>, solTitle: String, steps: List<String>, cat: Long? = catId) {
             if (repo.faults.first().any { it.title == title }) return
             repo.saveFault(FaultDraft(
-                fault = Fault(title = title, categoryId = catId, modelId = model, description = desc, altKeywords = alt,
+                fault = Fault(title = title, categoryId = cat, modelId = model, description = desc, altKeywords = alt,
                     warnings = warn, source = src, level = Verification.DOCUMENTED),
                 symptoms = symptoms, codes = codes,
                 solutions = listOf(SolutionDraft(solTitle, source = src, appliesTo = "موديل محدد — راجع الدليل", level = Verification.DOCUMENTED, warnings = warn, steps = steps)),
@@ -679,6 +728,24 @@ object ReferenceData {
                 "6 ومضات: بعد تغيير أي ملحق BlueBUS نفّذ تعلّم الأجهزة (▲ + Set).",
                 "LED BlueBUS: يومض مرة/ثانية = سليم • مرتان سريعتان = تغيّر حالة مدخل أو ريموت • منطفئ دائمًا = عطل تغذية أو مصهر • مضيء دائمًا = عطل خطير يتطلب استبدال اللوحة.",
             ))
+        fault("Somfy DEXXO PRO RTS — رسائل الأعطال على الشاشة", dexxoPro,
+            "من قسم أكواد الأعطال بمقتطف الكتالوج الفني — ليس جدول أكواد رقمية، بل رسائل حالة موصوفة نصيًا كما وردت.",
+            "Somfy Dexxo Pro RTS garage door fault safety forced entry maintenance",
+            SRC_SOMFY_DEXXO, W_GEN,
+            listOf("الشاشة تعرض رسالة عطل بدل الوضع الطبيعي، أو البوابة ترفض الحركة أو تطلب صيانة"),
+            listOf(
+                CodeDraft("مدخل الأمان نشط باستمرار", "تظهر عندما يبقى مدخل الأمان (Safety input) مفعّلًا لأكثر من 3 دقائق متواصلة — افحص توصيل جهاز الأمان (فوتوسيل أو حافة) وتأكد من عدم انحشاره في وضع التفعيل."),
+                CodeDraft("فشل الاختبار الذاتي لجهاز الأمان", "فشل الاختبار الذاتي (Self-test) لجهاز الأمان الموصول — افحص توصيل الجهاز ووظيفته، وتأكد من ضبط معامل «مدخل الأمان» على القيمة الصحيحة (مع اختبار ذاتي أو بدونه) حسب الجهاز المركَّب فعليًا."),
+                CodeDraft("أعطال أخرى على الشاشة", "أي رسالة أخرى غير مذكورة هنا تدل حسب الدليل على عطل في الدارة الإلكترونية نفسها — راجع الدليل الكامل أو الدعم الفني قبل استبدال اللوحة."),
+                CodeDraft("كشف فتح قسري (Forced entry)", "تظهر عند رصد محاولة تحريك الباب يدويًا من خارج الجراج، سواء بالكشف عبر إعادة ضخ التيار (power reinjection) أو عبر المشفّر البصري (optical encoder) — افحص سبب المحاولة قبل إعادة التشغيل العادي."),
+                CodeDraft("طلب صيانة", "تظهر عند وصول عداد الدورات للقيمة المضبوطة في معامل «مؤشر الصيانة» — نفّذ فحص صيانة دوري ثم أعد ضبط العداد من قائمة الإعداد."),
+            ),
+            "فحص سريع عند بقاء الشاشة مطفأة بعد أي عمل",
+            listOf(
+                "لو بقيت الشاشة مطفأة بعد أي تدخل على التوصيلات: افحص الأسلاك بحثًا عن قصر (Short circuit) أو عكس في القطبية قبل أي خطوة أخرى.",
+                "راجع رسالة الشاشة بدقة وقارنها بالقائمة أعلاه قبل فك أي توصيل أو استبدال أي قطعة.",
+                "الدليل المتاح مقتطف وليس كاملًا — لو واجهت رسالة غير مذكورة هنا، لا تخمّن معناها؛ راجع الدليل الكامل أو الدعم الفني لشركة Somfy.",
+            ), cat = catIdGarage)
         fault("FAAC 844 ER — أكواد الحالة على الشاشة", faac844,
             "الشاشة تعرض حالة الأتمتة (St).", "كود الشاشة 05، 08، FAAC 780D",
             SRC_FAAC, W_GEN,
