@@ -228,14 +228,14 @@ fun SearchScreen(nav: NavController, diagnose: Boolean) {
             Column(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 OutlinedTextField(
                     value = vm.query,
-                    onValueChange = vm::setQuery,
+                    onValueChange = vm::updateQuery,
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     placeholder = { Text(if (diagnose) "صف العطل أو العرض أو اكتب كود الخطأ" else "ابحث بالعربية أو الإنجليزية") },
                     leadingIcon = { Icon(Icons.Default.Search, null) },
                     trailingIcon = {
                         if (vm.query.isNotEmpty()) {
-                            IconButton(onClick = { vm.setQuery("") }) { Icon(Icons.Default.Clear, "مسح") }
+                            IconButton(onClick = { vm.updateQuery("") }) { Icon(Icons.Default.Clear, "مسح") }
                         }
                     },
                 )

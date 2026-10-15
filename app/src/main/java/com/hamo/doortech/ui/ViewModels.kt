@@ -135,7 +135,7 @@ class SearchViewModel(private val repo: AppRepository, private val fixedTypes: S
         }
     }
 
-    fun setQuery(v: String) { query = v; run() }
+    fun updateQuery(v: String) { query = v; run() }
     fun setCategory(v: Long?) { categoryId = v; run(immediate = true) }
     fun setBrand(v: Long?) {
         brandId = v
