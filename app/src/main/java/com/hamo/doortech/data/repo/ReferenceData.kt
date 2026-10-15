@@ -94,19 +94,63 @@ object ReferenceData {
             repo.addCameraImage(ownerType, ownerId, repo.mediaStore.fileFor(fileName))
         }
 
-        val came = brand("CAME", "إيطاليا")
-        val faac = brand("FAAC", "إيطاليا")
-        val nice = brand("Nice", "إيطاليا")
+        // -- معرفات الماركات والموديلات (مُعرَّفة هنا كمتغيرات قابلة للتعديل لتفادي تضخّم دالة واحدة؛ تُملأ داخل partModels) --
+        var came: Long = 0L
+        var faac: Long = 0L
+        var nice: Long = 0L
+        var etNice: Long = 0L
+        var roger: Long = 0L
+        var centurion: Long = 0L
+        var liftmaster: Long = 0L
+        var doorking: Long = 0L
+        var sommer: Long = 0L
+        var motorline: Long = 0L
+        var dea: Long = 0L
+        var bft: Long = 0L
+        var beninca: Long = 0L
+        var somfy: Long = 0L
+        var marantec: Long = 0L
+        var bx74: Long? = null
+        var bx78: Long? = null
+        var v6000: Long? = null
+        var faac844: Long? = null
+        var faac391: Long? = null
+        var run1800: Long? = null
+        var run2500: Long? = null
+        var nice1050: Long? = null
+        var etDrive500: Long? = null
+        var bm30: Long? = null
+        var d5evo: Long? = null
+        var sl3000: Long? = null
+        var robus: Long? = null
+        var dk9300: Long? = null
+        var s900: Long? = null
+        var mc50: Long? = null
+        var livi: Long? = null
+        var ares: Long? = null
+        var deimos: Long? = null
+        var deimosUl: Long? = null
+        var bull: Long? = null
+        var dexxoPro: Long? = null
+        var comfort260: Long? = null
+        var comfort360: Long? = null
+        var cpBull8om: Long? = null
+        var frog: Long? = null
+
+        suspend fun partModels() {
+        came = brand("CAME", "إيطاليا")
+        faac = brand("FAAC", "إيطاليا")
+        nice = brand("Nice", "إيطاليا")
 
         // ======================= CAME BX =======================
-        val bx74 = model(MachineModel(
+        bx74 = model(MachineModel(
             brandId = came, categoryId = catId, name = "BX-74", controlUnit = "لوحة ZB74-78",
             specs = "230V AC 50/60Hz • 200W • أقصى وزن للبوابة 400 كغ • وزن المكينة 15 كغ",
             remoteInfo = "حفظ مباشر على اللوحة بزر CH1/CH2 (انظر دليل الريموت).",
             sensorsInfo = "مداخل أمان NC (فوتوسيل/حافة). فتح تلامس أمان NC يُظهر وميض LED الإشارة.",
             notes = "الدليل للمركّبين المحترفين فقط.", source = SRC_CAME,
         ))
-        val bx78 = model(MachineModel(
+        bx78 = model(MachineModel(
             brandId = came, categoryId = catId, name = "BX-78", controlUnit = "لوحة ZB74-78",
             specs = "230V AC 50/60Hz • 300W • أقصى وزن للبوابة 800 كغ (600 كغ في الاستخدام السكني المشترك) • وزن المكينة 15 كغ",
             remoteInfo = "حفظ مباشر على اللوحة بزر CH1/CH2 (انظر دليل الريموت).",
@@ -115,7 +159,7 @@ object ReferenceData {
         ))
 
         // ======================= CAME V6000 (مكينة جراج علوية) =======================
-        val v6000 = model(MachineModel(
+        v6000 = model(MachineModel(
             brandId = came, categoryId = catIdGarage, name = "V6000", controlUnit = "لوحة تحكم مدمجة داخل غطاء المشغّل، بشاشة عرض رقمية (digit واحد) وأزرار P / + / - وزر حفظ ريموت S",
             specs = "مساحة الباب القصوى 9م² • أقصى ارتفاع لباب علوي متوازن بثقل مضاد (Counterbalanced) 2.4م • أقصى ارتفاع لباب علوي بزنبرك (Spring-balanced) 3.25م • أقصى ارتفاع لباب سكشنال 3.20م. " +
                 "درجة حماية IP40 • تغذية 230V AC 50/60Hz • تغذية المحرك 24V DC • استهلاك الاستعداد 7W • أقصى قدرة للملحقات 35W • القدرة الاسمية 100W • سرعة الفتح 6م/دقيقة • قوة الجر 600N • مدى حرارة التشغيل -20 إلى +55°م • فئة عزل II (مزدوج العزل) • الوزن 4.9 كغ.",
@@ -126,7 +170,7 @@ object ReferenceData {
         ))
 
         // ======================= FAAC 844 ER =======================
-        val faac844 = model(MachineModel(
+        faac844 = model(MachineModel(
             brandId = faac, categoryId = catId, name = "844 ER (Z16 / Z20)", controlUnit = "لوحة 780D مدمجة بشاشة وأزرار",
             specs = "Z16: وزن حتى 1800 كغ • طول حتى 40 م • 9.5 م/د • دفع أقصى 1160N | " +
                 "Z20: وزن حتى 1000 كغ • طول حتى 50 م • 12 م/د • دفع أقصى 930N | " +
@@ -137,7 +181,7 @@ object ReferenceData {
         ))
 
         // ======================= FAAC 391 / 391 E + لوحة E045S (بوابة مفصلية) =======================
-        val faac391 = model(MachineModel(
+        faac391 = model(MachineModel(
             brandId = faac, categoryId = catIdSwing, name = "391 / 391 E (بلوحة E045S)", controlUnit = "لوحة E045S مستقلة (تُستخدم أيضًا مع مشغّلات أخرى 230V~) — مشغّل 391 بدون لوحة مدمجة، 391 E بلوحة مدمجة",
             specs = "المشغّل (391/391E، هيدروليكي): مشغّل غير قابل للعكس لبوابة مفصلية — التفاصيل الميكانيكية الكاملة (الأبعاد، قوة الدفع، سرعة الفتح) لم تكن متاحة نصيًا بالكامل في الدليل المستخرَج (جداول المواصفات كانت مشوّشة جزئيًا) — غير مذكور بدقة هنا؛ راجع ملصق المشغّل. " +
                 "لوحة E045S: تغذية رئيسية 207-253V~ (50/60Hz) • استهلاك استعداد أقصى 4.3W • أقصى قدرة إجمالية للمحركين معًا 800W • تغذية ملحقات 24V DC حتى 500mA • تغذية BUS 2easy حتى 500mA • لمبة تحذير 230V~ حتى 60W • مدى حرارة التشغيل -20 إلى +55°م • مصهر التغذية الرئيسية F1 (5A — ⚠️ الرسم التخطيطي على اللوحة نفسها يذكر أيضًا قيمة بديلة 10A لإصدار 115V، تعارض محتمل بين النص والرسم لم يُحسم) ومصهر الملحقات F2 (T0.8A). تدعم محركًا واحدًا أو محركين (Mn=1 أو 2).",
@@ -148,14 +192,14 @@ object ReferenceData {
         ))
 
         // ======================= Nice RUN =======================
-        val run1800 = model(MachineModel(
+        run1800 = model(MachineModel(
             brandId = nice, categoryId = catId, name = "RUN1800 / RUN1800P", controlUnit = "لوحة مدمجة (الدليل المتاح لا يذكر رقم اللوحة؛ راجع ملصق المكينة)",
             specs = "وزن حتى 1800 كغ • عزم ذروة 40Nm (1110N) • اسمي 20Nm (560N) • قدرة قصوى 700W • سرعة بلا حمل 10 م/د (12 م/د لإصدار V1) • حتى 11 دورة/ساعة لمصراع 15 م • طول حتى 15 م • مفتاح الحد: ميكانيكي (RUN1800) أو حثي (RUN1800P)",
             remoteInfo = "مستقبل SMXI/SMXIS (أو OXI) على موصل SM، 433.92MHz. مخارج: 1 خطوة-بخطوة • 2 فتح جزئي • 3 فتح • 4 إغلاق.",
             sensorsInfo = "BlueBUS للملحقات (تعلّم الأجهزة بضغط ▲+Set).",
             notes = "صيانة كل 6 أشهر أو 20,000 مناورة. قوة الفك اليدوي القصوى 390N.", source = SRC_NICE,
         ))
-        val run2500 = model(MachineModel(
+        run2500 = model(MachineModel(
             brandId = nice, categoryId = catId, name = "RUN2500 / RUN2500P", controlUnit = "لوحة مدمجة (الدليل المتاح لا يذكر رقم اللوحة؛ راجع ملصق المكينة)",
             specs = "وزن حتى 2500 كغ • عزم ذروة 50Nm (1390N) • اسمي 30Nm (830N) • قدرة قصوى 870W • سرعة بلا حمل 10 م/د • حتى 15 دورة/ساعة لمصراع 15 م • طول حتى 18 م • مفتاح الحد: ميكانيكي (RUN2500) أو حثي (RUN2500P)",
             remoteInfo = "مثل RUN1800: SMXI/SMXIS/OXI على موصل SM.",
@@ -164,7 +208,7 @@ object ReferenceData {
         ))
 
         // ======================= Nice 1050 (لوحة تحكم) + مشغّل خطي 816 — طقم 1551 (سوق أمريكي UL325) =======================
-        val nice1050 = model(MachineModel(
+        nice1050 = model(MachineModel(
             brandId = nice, categoryId = catIdSwing, name = "لوحة 1050 + مشغّل خطي 816 (طقم 1551)", controlUnit = "لوحة تحكم 1050 (منفصلة عن المشغّل، تُركَّب في صندوق خاص) — منظومة Nice BlueBUS",
             specs = "تغذية التحكم 12V DC. جدول المواصفات في الدليل يذكر مدخل تغذية DC رئيسي 10-32V DC بينما قسم توصيل التغذية يذكر 10-35V DC — تعارض داخلي في الدليل نفسه لم يُحسم، فيُكتفى بذكر كلا الرقمين دون ترجيح. " +
                 "يدعم نوعي بوابة من قائمة البرمجة (Learn menu، القسم 31.5): مفصلية (Swing) أو منزلقة (Slide) — يُختار النوع أثناء البرمجة، فالمنظومة ليست حصرية لنوع واحد رغم أن المشغّل 816 خطي (Linear Actuator) يُستخدم غالبًا على البوابات المفصلية. " +
@@ -176,8 +220,8 @@ object ReferenceData {
         ))
 
         // ======================= ET NICE DRIVE 500 / DRIVE 600 (بوابات منزلقة، جنوب أفريقيا) =======================
-        val etNice = brand("ET NICE", "جنوب أفريقيا")
-        val etDrive500 = model(MachineModel(
+        etNice = brand("ET NICE", "جنوب أفريقيا")
+        etDrive500 = model(MachineModel(
             brandId = etNice, categoryId = catId, name = "DRIVE 500 / DRIVE 600", controlUnit = "لوحة تحكم موحّدة لكلا الموديلين بشاشة LCD وأزرار </Enter/>/X — تختلف تغذية الدخل فقط بين الموديلين",
             specs = "أقصى وزن بوابة 500 كغ لكلا الموديلين. DRIVE 500: تغذية رئيسية 16V AC @ 1A (50-60Hz) عبر محول خارجي، أقصى استهلاك ذروة 26W، دورة تشغيل قصوى 25% مع توفر 220Vac. DRIVE 600: تغذية رئيسية 220-240V AC (50-60Hz) مباشرة، أقصى استهلاك ذروة 240W، دورة تشغيل قصوى 98% مع توفر 220Vac. مدى حرارة تشغيل اللوحة المذكور في قائمة التشخيص -10 إلى 60°م (بينما مواصفات التشغيل العامة تذكر -10 إلى 50°م — تعارض داخلي في الدليل نفسه لم يُفسَّر).",
             remoteInfo = "مستقبل راديو مدمج بذاكرة تتسع حتى 1023 مستخدم (عنوان). طرق الحفظ: Quick Learn (بوظيفة واحدة أو Corresponding لأزرار ريموت ET BLUE الأربعة دفعة واحدة)، وAdvanced Learn (اختيار عنوان محدد يدويًا). يوجد أيضًا Erase عنوان واحد، Erase ALL memory (مسح كامل الذاكرة)، وDiagnose Remotes (قياس قوة إشارة الريموت واختبار تداخل 433.92MHz).",
@@ -187,8 +231,8 @@ object ReferenceData {
         ))
 
         // ======================= Roger BM30 =======================
-        val roger = brand("Roger Technology", "إيطاليا")
-        val bm30 = model(MachineModel(
+        roger = brand("Roger Technology", "إيطاليا")
+        bm30 = model(MachineModel(
             brandId = roger, categoryId = catId, name = "BM30/303/HS و BM30/304/HS", controlUnit = "لوحة B70 1DC مدمجة بالمحرك",
             specs = "محرك Brushless عالي السرعة غير قابل للعكس 24V • شبكة 230V AC/50Hz (إصدار /115 بـ 115V/60Hz) • أقصى سحب 2.5A • قدرة قصوى/اسمية 320W/125W • قوة بدء قصوى 350N • اسمية 125N (خدمة 50%) / 40N (خدمة 100%) • سرعة قصوى/اسمية 24/20 م/د • وزن البوابة حتى 400 كغ • طول حتى 12 م • IP43 • -20 إلى +50°C • ترس Z15 مديول 4 • 303 = مفتاح حد ميكانيكي، 304 = مغناطيسي",
             remoteInfo = "مستقبل RX-2 بقناتين P1/P2: اضغط P1 أو P2 على المستقبل مرة واحدة (حسب القناة)، LED يومض ببطء، اضغط الزر المطلوب في الريموت، يثبت LED ثانية واحدة = تم الحفظ. حذف ريموت واحد: اضغط مطولًا P1/P2 لمدة 4 ثوانٍ حتى يومض LED بسرعة، اطلق الزر، ثم اضغط زر الريموت المطلوب حذفه. حذف الكل: اضغط P1 وP2 معًا 4 ثوانٍ حتى يومض L1/L2 خمس ومضات.",
@@ -197,8 +241,8 @@ object ReferenceData {
         ))
 
         // ======================= Centurion D5-Evo / D5-Evo Low-Voltage =======================
-        val centurion = brand("Centurion Systems", "جنوب أفريقيا")
-        val d5evo = model(MachineModel(
+        centurion = brand("Centurion Systems", "جنوب أفريقيا")
+        d5evo = model(MachineModel(
             brandId = centurion, categoryId = catId, name = "D5-Evo / D5-Evo Low-Voltage", controlUnit = "لوحة تحكم مدمجة بشاشة LCD، مستقبل راديو NOVA مدمج (433MHz، تقنية Code-hopping)، وحساس أصل الحركة DOSS",
             specs = "D5-Evo: تغذية 90-240V AC ±10% (50Hz)، استهلاك 170mA، شاحن بطارية (1A عند 90Vac / 2.2A عند 240Vac)، حتى 150 مناورة/يوم، دورة تشغيل 50% مع توفر الشبكة. " +
                 "D5-Evo Low-Voltage: تغذية 15-19V AC أو 21-26V DC (⚠️ جدول المواصفات يذكر 21-26V DC بينما قسم التوصيل يذكر 10-20V AC أو 10-28V DC، ودليل استكشاف الأعطال يذكر 12-26V DC — ثلاث قيم متعارضة للمدى نفسه لم يحسمها الدليل)، حتى 55 مناورة/يوم، دورة تشغيل 20%. " +
@@ -211,8 +255,8 @@ object ReferenceData {
         ))
 
         // ======================= LiftMaster SL3000UL8 (مركبات، بوابات منزلقة) =======================
-        val liftmaster = brand("LiftMaster", "الولايات المتحدة")
-        val sl3000 = model(MachineModel(
+        liftmaster = brand("LiftMaster", "الولايات المتحدة")
+        sl3000 = model(MachineModel(
             brandId = liftmaster, categoryId = catId, name = "SL3000UL8 / SL3000ULDM8 / SL3000UL1HP8", controlUnit = "لوحة OmniControl™ مدمجة بمحطة أزرار ثلاثية (Close/Stop/Open)، مؤقت إغلاق تلقائي، ومفتاح اتجاه فتح (يسار/يمين)",
             specs = "⚠️ تعارض داخلي في الدليل نفسه حول نوع البوابة: غلاف الدليل يصنّفها لبوابات مفصلية (Swing) من الفئات I-IV حسب UL325، بينما قسم النظرة العامة يصفها كمكينة بوابة منزلقة (Slide) — اعتمد على التسمية الفعلية «Vehicular Slide Gate Operator» في عنوان الدليل كونها الأرجح. " +
                 "SL3000UL8 (محرك واحد 1/2 حصان): تيار 4A • أقصى طول بوابة 37 قدم (~11.3م) • أقصى وزن 1000 رطل (~454كغ) • أقصى قوة جر 105 رطل. " +
@@ -227,7 +271,7 @@ object ReferenceData {
         ))
 
         // ======================= Nice ROBUS RBS400 / RBS600 / RBS600HS (بوابات منزلقة) =======================
-        val robus = model(MachineModel(
+        robus = model(MachineModel(
             brandId = nice, categoryId = catId, name = "ROBUS RBS400 / RBS600 / RBS600HS", controlUnit = "لوحة تحكم إلكترونية مدمجة (منطق MCU1 لموديلي RBS400/RBS600، ومنطق MCU4 لموديل RBS600HS) بـ3 أزرار (f/g/h) و8 مؤشرات LED (L1-L8)، مع موصل SM لمستقبل راديو OXI أو OXIBD",
             specs = "مشترك بين كل الموديلات: أقصى طول ضلفة بوابة 8م • تغذية 230V (أو 120V بإصدار /V1، أو 250V بإصدار /AU01) • عزم بدء أقصى 9.3Nm (~310N) • IP44 • مدى حرارة -20 إلى +55°م • أبعاد 340×220×303مم • وزن 11.2كغ. " +
                 "RBS400: أقصى وزن بوابة 400كغ • تيار 1.1A • قدرة 250W • سرعة 0.34م/ث • عزم اسمي 3.6Nm (120N) • دورة تشغيل 35 مناورة/ساعة (ضلفة حتى 4م) أو 20 مناورة/ساعة (حتى 8م). " +
@@ -241,8 +285,8 @@ object ReferenceData {
         ))
 
         // ======================= DoorKing 9300 (بوابات منزلقة مركبات) =======================
-        val doorking = brand("DoorKing", "الولايات المتحدة")
-        val dk9300 = model(MachineModel(
+        doorking = brand("DoorKing", "الولايات المتحدة")
+        dk9300 = model(MachineModel(
             brandId = doorking, categoryId = catId, name = "9300", controlUnit = "لوحة تحكم مدمجة بمفتاحي ديب سويتش SW1 (علوي) وSW2 (سفلي)، 3 بوتنشيومترات ضبط، ومؤشرات LED متعددة",
             specs = "فئات التشغيل I وII وIII وIV (UL325) — لبوابات منزلقة مركبات حصرًا. يتوفر بقوة 1/2 أو 1 حصان، تغذية 115/208/230/460V. " +
                 "بموديل 1/2 حصان: أقصى وزن بوابة 1000 رطل (~454كغ)، أقصى طول 35 قدم (~10.7م)، تيار 5.4A عند 115V أو 2.7A عند 208/230V أو 1.35A عند 460V. " +
@@ -255,8 +299,8 @@ object ReferenceData {
         ))
 
         // ======================= SOMMER S 900 (بوابات منزلقة) =======================
-        val sommer = brand("SOMMER", "ألمانيا")
-        val s900 = model(MachineModel(
+        sommer = brand("SOMMER", "ألمانيا")
+        s900 = model(MachineModel(
             brandId = sommer, categoryId = catId, name = "S 900 (Somloq Rollingcode / SOMloq2)", controlUnit = "لوحة تحكم ST-B-1 مدمجة (موديلا راديو: Somloq Rollingcode القديم، أو SOMloq2 الأحدث) — يتطلب لوحة ST-B-1 حصرًا مع برمجة S900/SP900",
             specs = "تغذية 220-240V AC (50-60Hz) • استهلاك 46W (استعداد 0.5W فقط) • عزم اسمي 3Nm وعزم أقصى 10Nm • سرعة قصوى 285مم/ث • دورة تشغيل S3 40% • مدى حرارة -20 إلى +60°م • IP64 للوحة التحكم (المشغّل نفسه بلا عمود لا يحمل تصنيف IP، ويحتاج تركيبه مع عمود لتحقيق IP44 كمنظومة كاملة). " +
                 "مسار البوابة 1.4م (أدنى) إلى 8م (أقصى). أقصى وزن بوابة: بعمود الإدارة القياسي حتى 250كغ (مع ميل أرضي حتى 3.5%) أو 251-400كغ (أرض مستوية 0% ميل) • بعمود مطوّل بامتداد 50مم حتى 400كغ (0% ميل) • بعمود مطوّل بامتداد 100مم حتى 300كغ (0% ميل). بوتنشيومتر وزن البوابة له 4 إعدادات: 100/200/300/400كغ (25%/50%/75%/100% على القرص). " +
@@ -268,8 +312,8 @@ object ReferenceData {
         ))
 
         // ======================= Motorline MC50SC =======================
-        val motorline = brand("Motorline", "البرتغال")
-        val mc50 = model(MachineModel(
+        motorline = brand("Motorline", "البرتغال")
+        mc50 = model(MachineModel(
             brandId = motorline, categoryId = catId, name = "لوحة MC50SC", controlUnit = "MC50SC (v7.3) — لوحة تحكم للبوابات المنزلقة بمستقبل راديو مدمج",
             specs = "230V AC 50-60Hz • خرج محرك 230V حتى 1000W • خرج مصباح 230V حتى 100W • ملحقات 24V DC حتى 8W • خرج RGB 24V/100mA • راديو 433.92MHz (12 بت أو Rolling Code) • ذاكرة 100 فتح كلي + 100 مشاة • -25 إلى +55°C • 105×130 مم • مفتاح Dipper لمحركات أقل أو أكبر من 500W",
             remoteInfo = "مستقبل مدمج؛ حفظ بزر cmd (انظر دليل الريموت).",
@@ -278,8 +322,8 @@ object ReferenceData {
         ))
 
         // ======================= DEA LIVI =======================
-        val dea = brand("DEA System", "إيطاليا")
-        val livi = model(MachineModel(
+        dea = brand("DEA System", "إيطاليا")
+        livi = model(MachineModel(
             brandId = dea, categoryId = catId, name = "LIVI (6RR / 9RR / 805RR / 5/24RR/F / 8/24RR/F / 403E / 803E)", controlUnit = "لوحات DEA (سلسلة NET) — ربط كل موديل بلوحته غير مؤكد في المقتطف",
             specs = "230V (وإصدارات 24V) • قدرة ممتصة 320 / 450 / 490 / 80 W • مكثف 8 أو 12.5µF • دفع أقصى 210–350N • وزن 8.2–12 كغ • سرعة ~10 م/د • IPX4 • حرارة -20 إلى +40°C • حماية حرارية 140° أو 160° — ملاحظة: جدول الدليل مشوَّش فلا يمكن ربط كل رقم بموديل بعينه",
             remoteInfo = "انظر دليل «DEA NET24N» (تعلّم P005).",
@@ -288,15 +332,15 @@ object ReferenceData {
         ))
 
         // ======================= BFT =======================
-        val bft = brand("BFT", "إيطاليا")
-        val ares = model(MachineModel(
+        bft = brand("BFT", "إيطاليا")
+        ares = model(MachineModel(
             brandId = bft, categoryId = catId, name = "ARES ULTRA BT A (A1000 / A1500)", controlUnit = "لوحة MERAK بشاشة وسيناريوهات مبرمجة مسبقًا",
             specs = "مشغل 24V • A1000 حتى 1000 كغ وA1500 حتى 1500 كغ بسرعة 9 م/د • طرازات 500/750 كغ بسرعة 12 م/د • تغذية اللوحة 230V أحادي الطور • ميزات: D-Track ضد الانحشار، تباطؤ فتح/إغلاق، مستقبل ثنائي القناة مدمج",
             remoteInfo = "أجهزة MITTO 4 ثنائية القناة (50/100م، بطارية 12V 23A) ولوحة مفاتيح لاسلكية 433MHz Rolling Code. إجراء الحفظ غير مذكور في الكتالوج.",
             sensorsInfo = "كشف وجود الأشخاص ومرور المشاة ضمن وظائف اللوحة؛ التفاصيل غير مذكورة.",
             notes = "الكتالوج لا يتضمن جداول البرمجة ولا الأخطاء — راجع دليل الفني الكامل لـ MERAK.", source = SRC_BFT,
         ))
-        val deimos = model(MachineModel(
+        deimos = model(MachineModel(
             brandId = bft, categoryId = catId, name = "DEIMOS ULTRA BT A", controlUnit = "لوحة MERAK بشاشة (جاهزة للربط مع U-Link)",
             specs = "24V • مفتاح حد مغناطيسي • ثلاثة طرازات: 300 كغ بسرعة 16 م/د — 400 كغ بسرعة 12 م/د — 600 كغ بسرعة 12 م/د (أسماء الطرازات والقدرة بالواط غير مذكورة)",
             remoteInfo = "غير مذكور — الإعدادات يمكن التحكم بها عن بعد عبر U-Link.",
@@ -308,7 +352,7 @@ object ReferenceData {
         // ملحوظة مهمة: هذا موديل مختلف تمامًا عن "DEIMOS ULTRA BT A" أعلاه — مصدره دليل آخر بالكامل
         // (BFT U.S.، Quick Reference Guide) للوحة مختلفة (QSCD UL) ومواصفات مختلفة (120V/60Hz أمريكي)،
         // فلا تُخلط بياناته مع كتالوج ARES/DEIMOS ULTRA BT A (لوحة MERAK، إصدار أوروبي 24V/230V).
-        val deimosUl = model(MachineModel(
+        deimosUl = model(MachineModel(
             brandId = bft, categoryId = catId, name = "DEIMOS BT KIT UL (طقم أمريكي 120V)", controlUnit = "لوحة تحكم QSCD UL (رقم القطعة D111754 00001)",
             specs = "تغذية 120V ac ±10% - 60Hz • عزم تشغيل 14.75 lb·ft • تعشيق ترس 0.157 بوصة (14 سنًا) • سرعة حركة البوابة 7.9 بوصة/ث • مفاتيح حد مدمجة كهروميكانيكية • فك يدوي بمفتاح تحرير (Release Key - CLS) • 100 دورة/يوم • طول بوابة حتى 75 قدمًا • وزن بوابة حتى 1100 رطل (≈500 كغ). " +
                 "محتويات الطقم (Ref. # R925228 00003): 4 خطافات تثبيت (Anchoring hook) • 2 لوح ضبط ارتفاع (Height adjustment plate) • 1 لوح تمركز (Positioning template plate) • 16 صامولة M10 • 4 حلقة M10 • ريموت MITTO 2 • فوتوسيل FL 130B • مفتاح فك يدوي CLS • كتيفتا مفتاح حد يمين/يسار • المشغّل نفسه DEIMOS BT.",
@@ -320,8 +364,8 @@ object ReferenceData {
         ))
 
         // ======================= Beninca BULL 424 ESA / 624 ESA =======================
-        val beninca = brand("Beninca", "إيطاليا")
-        val bull = model(MachineModel(
+        beninca = brand("Beninca", "إيطاليا")
+        bull = model(MachineModel(
             brandId = beninca, categoryId = catId, name = "BULL 424 ESA / 624 ESA", controlUnit = "لوحة مدمجة بالمحرك CP.B24 ESA (أو CP.B1024 ESA بتغذية 115V)",
             specs = "محرك 24Vdc أحادي الكتلة، تغذية اللوحة 230Vac 50Hz (أو 115Vac لإصدار A) • BULL424: عزم 12 Nm، تيار 0.4A، وزن بوابة أقصى 350 كغ، سرعة فتح 11 م/د، وزن 10.2 كغ • BULL624: عزم 24 Nm، تيار 0.5A، وزن بوابة أقصى 600 كغ، سرعة فتح 9.75 م/د، وزن 11.6 كغ • كريمايير مديول M4 • IP44 • حرارة التشغيل -20 إلى +50°C • زيت Castrol Optitemp LP2",
             remoteInfo = "مستقبل راديو مدمج باللوحة، تخزين مباشر من قائمة RAD (PP للقناة الأولى، 2CH للثانية، PED للفتح الجزئي) بدون الحاجة لفتح اللوحة؛ ويدعم أيضًا «تعلّم الريموت عن بعد» من ريموت محفوظ مسبقًا بدون الدخول لقائمة البرمجة.",
@@ -332,8 +376,8 @@ object ReferenceData {
         // ======================= قسم مكينات أبواب الجراج العلوية — Somfy DEXXO PRO =======================
         // أول موديل في القسم الجديد، حسب طلب المستخدم بتغطية كل شركات الجراج (Somfy/Marantec/Life/...).
         // المصدر مقتطف فني من كتالوج Somfy منشور على archiexpo — وليس الدليل الكامل، فمخططات التوصيل فيه صور لم يمكن استخراج نصها.
-        val somfy = brand("Somfy", "فرنسا")
-        val dexxoPro = model(MachineModel(
+        somfy = brand("Somfy", "فرنسا")
+        dexxoPro = model(MachineModel(
             brandId = somfy, categoryId = catIdGarage, name = "DEXXO PRO 800 RTS / 800 3S RTS / 1000 RTS / 1000 3S RTS", controlUnit = "لوحة مدمجة بالمحرك (الاسم التجاري للوحة غير مذكور في المقتطف المتاح؛ راجع ملصق اللوحة نفسها)",
             specs = "مشغّل جراج للأبواب التي تُفتح رأسيًا للاستخدام السكني، مطابق لمعيار EN 60335-2.95، ومصمَّم (عند التركيب وفق الدليل وقائمة الفحص الخاصة به) ليطابق EN 13241-1 وEN 12453. الفروق الدقيقة بين 800 وdocumentation 1000 وإصدارات 3S (ثلاثة أزرار) غير مفصَّلة في المقتطف المتاح — راجع الدليل الكامل أو ملصق المكينة لتحديد الطراز بدقة.",
             remoteInfo = "يعمل بنظام Somfy RTS. خطوات حفظ الريموت لوضع «الفتح الكلي» مذكورة في فهرس الدليل لكن تفاصيلها لم تظهر في المقتطف المتاح — غير مذكورة هنا لتفادي الاختلاق.",
@@ -344,8 +388,8 @@ object ReferenceData {
 
         // ======================= Marantec Comfort 260 / 270 / 280 (قسم أبواب الجراج) =======================
         // الدليل الرسمي الكامل (30 صفحة) اللي رفعه المستخدم — مش مقتطف، فالبيانات هنا أدق وأشمل من موديل Somfy أعلاه.
-        val marantec = brand("Marantec", "ألمانيا")
-        val comfort260 = model(MachineModel(
+        marantec = brand("Marantec", "ألمانيا")
+        comfort260 = model(MachineModel(
             brandId = marantec, categoryId = catIdGarage, name = "Comfort 260 / 270 / 280 (و BL)", controlUnit = "لوحة تحكم مدمجة بوحدة المحرك (EOS — Easy Operating System)، تدعم ربط MS BUS وريموت b·linked",
             specs = "تغذية 230/260V (قد تختلف حسب المنطقة) • 50/60Hz • تيار دخول 1.1A • استهلاك أثناء التشغيل 0.25kW • استهلاك الاستعداد: ~4W (260/270/280) أو ~0.6W (260BL/270BL/280BL، نسخة منخفضة الاستهلاك) • دورة عمل قصيرة 2 دقيقة • جهد التحكم 24V DC • درجة حماية وحدة المحرك IP20 • فئة عزل II. " +
                 "القوة القصوى للدفع والسحب: Comfort 260 = 550N • Comfort 270 = 750N • Comfort 280 = 1000N (نفس القيم لإصدارات BL). السرعة القصوى للحركة 160mm/ث. زمن الفتح التقريبي (حسب نوع الباب) ~14 ثانية. " +
@@ -356,7 +400,7 @@ object ReferenceData {
             source = SRC_MARANTEC_COMFORT,
         ))
 
-        val comfort360 = model(MachineModel(
+        comfort360 = model(MachineModel(
             brandId = marantec, categoryId = catIdGarage, name = "Comfort 360 / 370 / 380", controlUnit = "لوحة تحكم مدمجة بوحدة المحرك (نفس نظام EOS — Easy Operating System)، تدعم ربط MS BUS وريموت b·linked — طراز «blueline» الأحدث مع شارات 50°/b-linked/EOS/MSBUS على الغطاء",
             specs = "تغذية 230/260V • 50/60Hz • جهد التحكم 24V DC • درجة حماية وحدة المحرك IP20 • فئة عزل II. " +
                 "القوة القصوى للدفع والسحب: Comfort 360 = 650N • Comfort 370 = 850N • Comfort 380 = 1100N. السرعة القصوى للحركة: 360 = 235mm/ث • 370 = 220mm/ث • 380 = 180mm/ث. زمن الفتح التقريبي: 360 ≈ 9.5 ثانية • 370 ≈ 9.0 ثانية • 380 ≈ 12.0 ثانية. دورة العمل القصيرة: 2 دقيقة (360/370) أو حتى 5 دقائق (380). " +
@@ -368,7 +412,7 @@ object ReferenceData {
         ))
 
         // ======================= Beninca CP.BULL8 OM (لوحة تحكم مستقلة لمحرك واحد 230V) =======================
-        val cpBull8om = model(MachineModel(
+        cpBull8om = model(MachineModel(
             brandId = beninca, categoryId = catId, name = "CP.BULL8 OM (لوحة تحكم لمحرك واحد)", controlUnit = "لوحة تحكم مستقلة CP.BULL8 OM — مركز أوامر لمحرك منفرد 230Vac لبوابات منزلقة، شاشة عرض 4 أرقام وأزرار +/-/PG",
             specs = "تغذية اللوحة 24Vdc داخليًا • التغذية الرئيسية 230Vac 50/60Hz (أو 115Vac 50/60Hz حسب الإصدار) • مخرج تغذية المحرك: محرك واحد 230Vac • أقصى قدرة للمحرك 280W • مخرج تغذية الملحقات 24Vac حتى 500mA • درجة الحماية IP54 • حرارة التشغيل من -20°م إلى +50°م • مستقبل راديو مدمج 433.92MHz (قابل للإعداد Rolling-code أو Programmable+Rolling-code) • يدعم حتى 64 ريموت Rolling-code.",
             remoteInfo = "مستقبل راديو مدمج باللوحة، تخزين من قائمة rAd (PP للخطوة-بخطوة، 2ch للقناة الثانية، PEd للفتح الجزئي، cLr لمسح كود واحد، rtr لمسح الذاكرة بالكامل). يدعم أيضًا «نسخ عن بعد» (Remote copy) لإضافة ريموت جديد من ريموت محفوظ مسبقًا بدون فتح اللوحة. الذاكرة تُخزَّن في شريحة EPROM (U5) قابلة للنقل لوحدة تحكم أخرى عند الاستبدال.",
@@ -378,7 +422,7 @@ object ReferenceData {
         ))
 
         // ======================= CAME FROG KIT (أول موديل في قسم البوابات ذات الضلفتين) =======================
-        val frog = model(MachineModel(
+        frog = model(MachineModel(
             brandId = came, categoryId = catIdSwing, name = "FROG KIT (FROG A / FROG AV)", controlUnit = "لوحة تحكم ZA4 — معالج دقيق (Micro-processor)، تغذية 230Vac 50/60Hz أحادي الطور، مصممة للتحكم بمكينات CAME ATI/FERNI/FROG للبوابات المفصلية والأبواب الصناعية المفصلية، IP54",
             specs = "طقم FROG-P يتضمن: 2× علبة تأسيس تحت-أرضية (Underground foundation casing) + 2× مكينة بوابة تحت-أرضية + 1× لوحة تحكم ZA4 + 1× كرت ترددات راديو + 1× هوائي مضبوط + 2× ريموت + 1× زوج فوتوسيل أمان. " +
                 "FROG A: وزن 11كغ، تغذية 230Vac، تيار 1.9A، قدرة 200W، دورة عمل 30%، أقصى عزم 320Nm (قابل للضبط من لوحة CAME)، نسبة تخفيض 1/1152، زمن الشوط 18 ثانية، مكثف 16μF. " +
@@ -389,6 +433,7 @@ object ReferenceData {
             notes = "البيانات من دليل التركيب الرسمي الكامل (32 صفحة) الذي رفعه المستخدم — نسخة CAME United Kingdom Ltd. أول موديل في قسم «$CATEGORY_SWING» الجديد؛ هذه مكينات تحت-أرضية (underground) وليست أذرع مفصلية مرئية — مناسبة للبوابات الثقيلة أو حيث يُطلب عدم ظهور المكينة.",
             source = SRC_CAME_FROG,
         ))
+        }
 
         // ======================= أدلة البرمجة =======================
         val guides = mutableListOf<GuideDraft>()
@@ -401,6 +446,8 @@ object ReferenceData {
                 steps,
             )
         }
+
+        fun partGuides1() {
 
         g(GuideType.WIRING, "Beninca BULL ESA (لوحة CP.B24 ESA) — جدول الأطراف الكامل", bull,
             "جدول أطراف لوحة CP.B24 ESA / CP.B1024 ESA كاملًا من قسم «9.1 WIRE DIAGRAM» بالدليل الرسمي.",
@@ -764,6 +811,9 @@ object ReferenceData {
                 "J13: موصل 10 أطراف لمدخل حلقة استشعار الخروج (5 أو 0Vdc).",
                 "كرت واقي الشحنات (Surge Suppressor): J1 لربط M/S Link (G=صفر، B وA=5 أو 0Vdc) • J2: طرف 7-8=مفتاح رجال الإطفاء (تلامس جاف)، 9-10=زر Strike Open (تلامس جاف)، 11=سالب مستقبل الراديو، 12=مستقبل الراديو، 13=موجب مستقبل الراديو (مخرج 24Vdc) • J3: 1-2=غير مستخدم، 3-4=حلقة أمان خارجية (2-10Vdc)، 5-6=حلقة خروج خارجية (2-10Vdc).",
             ), cat = catId)
+        }
+
+        fun partGuides2() {
         g(GuideType.PROGRAMMING, "LiftMaster SL3000UL8 — ضبط مفتاح الحد، مؤقت الإغلاق التلقائي، وحساسات الانعكاس/الإنذار", sl3000,
             "من أقسام «Limit Switch Adjustment» (ص26)، «Setting Timer (ON, OFF)» (ص28)، و«Adjusting Reversing Sensor(s)» (ص29) بالدليل الرسمي.",
             "$W_GEN افصل التغذية الكهربائية إلزاميًا قبل أي ضبط لمفتاح الحد. اتجاه ضبط حساس الانعكاس (مع/عكس عقارب الساعة لزيادة/تقليل الحساسية) غير مذكور بوضوح تام في هذا القسم بالذات — راجع تناقض ملحوظ مع جدول الأعطال أدناه.",
@@ -1150,6 +1200,9 @@ object ReferenceData {
             ), cat = catIdGarage)
 
         // ======================= BFT DEIMOS BT KIT UL (لوحة QSCD UL) =======================
+        }
+
+        fun partGuides3() {
         g(GuideType.WIRING, "BFT DEIMOS BT KIT UL — جدول الأطراف الكامل (Wiring Diagram)", deimosUl,
             "جدول أطراف لوحة QSCD UL كاملًا من صفحة «Wiring Diagram» (ص16) بدليل Quick Reference الرسمي.",
             "$W_GEN تلامسات الأمان على اللوحة NC دائمًا وتلامسات الأوامر NO دائمًا — كلها تلامسات جافة (dry contacts)، وتوصيل جهد عليها يُتلف اللوحة.",
@@ -1509,10 +1562,9 @@ object ReferenceData {
                 "إنهاء البرمجة: اضغط الأسهم حتى تظهر ----.",
             ))
 
-        guides.forEach { d ->
-            if (repo.guides.first().none { it.title == d.guide.title }) repo.saveGuide(d)
         }
 
+        suspend fun partImages() {
         // ======================= صور حقيقية من الكتالوجات (مخططات توصيل وصور مكينة) =======================
         img(OwnerType.MODEL, bull, "bull_cover.png")
         img(OwnerType.MODEL, bull, "bull_wiring_main.png")
@@ -1585,6 +1637,8 @@ object ReferenceData {
             img(OwnerType.GUIDE, it.id, "came_frog_terminals.png")
         }
 
+        }
+
         // ======================= أعطال ورموز موثقة =======================
         suspend fun fault(title: String, model: Long?, desc: String, alt: String, src: String, warn: String,
                           symptoms: List<String>, codes: List<CodeDraft>, solTitle: String, steps: List<String>, cat: Long? = catId) {
@@ -1597,6 +1651,8 @@ object ReferenceData {
             ))
         }
 
+
+        suspend fun partFaults1() {
         fault("Nice RUN — عدد ومضات الفلاشر (أكواد الأعطال)", run1800,
             "الفلاشر يومض بعدد معين لتحديد سبب التوقف.", "فلاشر يومض، عدد الومضات، كود خطأ RUN، Nice flash code",
             SRC_NICE, W_GEN,
@@ -1852,6 +1908,9 @@ object ReferenceData {
                 "بعد إعادة الضبط اختبر دورة فتح وإغلاق كاملة للتأكد من زوال العطل قبل تسليم التركيب.",
                 "لو تكرر العطل فورًا بعد كل إعادة ضبط، افحص سبب الحمل الزائد الفعلي على المحرك (احتكاك ميكانيكي، وزن بوابة يتجاوز حدود الموديل، أو عطل داخلي بالمحرك نفسه) قبل تكرار إعادة الضبط دون جدوى.",
             ), cat = catId)
+        }
+
+        suspend fun partFaults2() {
         fault("Nice ROBUS — مؤشرات LED أثناء التشغيل والفحص الأولي (⚠️ جدول استكشاف الأعطال الكامل غير متاح في هذا المصدر)", robus,
             "⚠️ ملاحظة صريحة مهمة: قسم استكشاف الأعطال الكامل في الدليل الرسمي («9. Que faire si...» بما فيه 9.1 حل المشاكل، 9.3-9.5 إشارات الفلاشر واللوحة، 9.6 تشخيص الراديو، 9.7 قائمة تاريخ الأعطال) لم يكن متاحًا نصيًا في النسخة المستخرَجة عبر WebFetch — ظهرت عناوين الأقسام فقط في الفهرس دون محتواها الفعلي. ما يلي مُجمَّع فقط من إشارات LED متفرقة وردت فعليًا في أقسام أخرى من الدليل (5.1، 5.3.1، 5.4، 6.1، 8) وليس جدول أعطال رسمي كامل.",
             "Nice Robus RBS400 RBS600 LED status diagnostic BlueBUS flashing light",
@@ -2118,5 +2177,17 @@ object ReferenceData {
                 "الشاشة قد تعرض: حد الفتح مفعّل، في وقت الإيقاف، الذاكرة ممتلئة، الخلايا مسدودة، شريط الأمان مضغوط، فشل كشف الحساسية، انعكاس بسبب المجهود.",
                 "إن انعكس الاتجاه بسبب المجهود فراجع الاحتكاك والمسار ثم P2 (القوة والحساسية).",
             ))
+        }
+
+        partModels()
+        partGuides1()
+        partGuides2()
+        partGuides3()
+        guides.forEach { d ->
+            if (repo.guides.first().none { it.title == d.guide.title }) repo.saveGuide(d)
+        }
+        partImages()
+        partFaults1()
+        partFaults2()
     }
 }
