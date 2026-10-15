@@ -275,7 +275,7 @@ fun JobEditScreen(nav: NavController, id: Long) {
                         if (r is Outcome.Fail) { error = if (r.message.contains("العميل")) r.message else null; messenger.show(r.message) }
                         else {
                             messenger.show("تم حفظ الزيارة")
-                            if (id == 0L) nav.navigate(Routes.job(r.id)) { popUpTo(Routes.JOBS) } else nav.popBackStack()
+                            if (id == 0L) nav.navigate(Routes.job((r as Outcome.Ok).id)) { popUpTo(Routes.JOBS) } else nav.popBackStack()
                         }
                     }
                 }, Modifier.fillMaxWidth(), enabled = !vm.saving)
