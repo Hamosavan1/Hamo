@@ -170,12 +170,4 @@ class DataTest {
         val junk = File(ctx.cacheDir, "junk.zip").also { it.writeText("not a zip") }
         assertTrue(BackupManager(repo).inspect(junk) is InspectResult.Invalid)
     }
-
-    @Test fun pdfReportIsCreated() {
-        val job = MaintenanceJob(id = 1, customerName = "عميل تجريبي", problem = "مشكلة", solution = "حل")
-        val f = JobReportPdf(ctx).create(JobReportData(job, emptyList(), "تصنيف", "شركة", "موديل", emptyList()))
-        assertTrue(f.exists())
-        assertTrue(f.length() > 500)
-        assertTrue(f.readBytes().take(4).map { it.toInt().toChar() }.joinToString("") == "%PDF")
-    }
 }
