@@ -27,7 +27,10 @@ object ReferenceData {
             "لا تترك المكينة في وضع الفك اليدوي بعد الانتهاء. هذه الخطوات منقولة من دليل الشركة وللفنيين المؤهلين فقط."
 
     suspend fun populate(repo: AppRepository) {
-        val catId = repo.categoriesOnce().firstOrNull { it.name == CATEGORY }?.id
+        val existing = repo.categoriesOnce().firstOrNull { it.name == CATEGORY }
+        // التصنيف يصبح ملكًا للمستخدم (غير تجريبي) كي لا يمنع حذف البيانات التجريبية.
+        if (existing != null && existing.isSeed) repo.saveCategory(existing.copy(isSeed = false))
+        val catId = existing?.id
             ?: (repo.saveCategory(DoorCategory(name = CATEGORY, description = "بوابات سيارات تنزلق أفقيًا.")) as? Outcome.Ok)?.id
         suspend fun brand(name: String, country: String): Long =
             repo.brandsOnce().firstOrNull { it.name == name }?.id

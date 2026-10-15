@@ -48,6 +48,7 @@ object SeedData {
         catDefs.forEach { (name, desc) ->
             val r = repo.saveCategory(DoorCategory(name = name, description = desc, isSeed = true))
             if (r is Outcome.Ok) cats[name] = r.id
+            else repo.categoriesOnce().firstOrNull { it.name == name }?.let { cats[name] = it.id }
         }
         fun cat(name: String) = cats[name]
 
