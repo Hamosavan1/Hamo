@@ -38,6 +38,6 @@ class AppContainer(context: Context) {
 
     companion object {
         private const val KEY_SEEDED = "seed_done_v1"
-        private const val KEY_REF = "ref_sliding_v1"
+        private const val KEY_REF = "ref_sliding_v2"
     }
 }

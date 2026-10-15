@@ -177,10 +177,10 @@ class DataTest {
         ReferenceData.populate(repo)
         ReferenceData.populate(repo) // لا يكرر
         val brands = repo.brandsOnce().filter { !it.isSeed }.map { it.name }
-        assertEquals(setOf("CAME", "FAAC", "Nice"), brands.toSet())
-        assertTrue(repo.modelsOnce().count { !it.isSeed } >= 4)
+        assertTrue(brands.toSet().containsAll(setOf("CAME", "FAAC", "Nice", "Motorline", "Roger Technology", "BFT", "DEA System")))
+        assertTrue(repo.modelsOnce().count { !it.isSeed } >= 8)
         val before = repo.guides.first().count { !it.isSeed }
-        assertTrue(before >= 8)
+        assertTrue(before >= 15)
         ok(repo.deleteSeedData())
         assertEquals(before, repo.guides.first().size)
         val hits = SearchEngine.search(repo.searchDocs(), "844")
