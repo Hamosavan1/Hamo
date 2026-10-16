@@ -58,6 +58,7 @@ object ReferenceCatalogs {
         for (cm in all()) {
             try { load(context, repo, cm) } catch (e: Exception) { /* موديل واحد لا يوقف الباقي */ }
         }
+        try { CatalogPdfs.attach(context, repo) } catch (e: Exception) { /* المرفقات لا توقف التطبيق */ }
     }
 
     private suspend fun load(context: Context, repo: AppRepository, cm: CatModel) {
