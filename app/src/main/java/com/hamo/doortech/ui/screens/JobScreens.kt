@@ -74,7 +74,7 @@ fun JobsScreen(nav: NavController) {
     var text by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = { HamoTopBar("سجل الصيانة") },
+        topBar = { HamoTopBar("سجل الصيانة", onBack = { nav.popBackStack() }) },
         floatingActionButton = {
             ExtendedFloatingActionButton(onClick = { nav.navigate(Routes.jobEdit(0)) }, icon = { Icon(Icons.Default.Add, null) }, text = { Text("زيارة جديدة") })
         },

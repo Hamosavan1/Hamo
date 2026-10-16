@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.ElectricalServices
 import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SettingsRemote
@@ -88,9 +90,12 @@ import com.hamo.doortech.util.ltr
 private data class MoreEntry(val label: String, val hint: String, val icon: ImageVector, val route: String)
 
 private val moreEntries = listOf(
+    MoreEntry("لوحة الإدارة", "إضافة شركة أو موديل أو دليل أو عطل", Icons.Default.Settings, Routes.ADMIN),
     MoreEntry("أنواع الأبواب والبوابات", "تصنيفات قابلة للتعديل", Icons.Default.Category, Routes.CATEGORIES),
-    MoreEntry("الشركات المصنعة", "إضافة وتعديل الشركات", Icons.Default.Business, Routes.BRANDS),
-    MoreEntry("قائمة الموديلات", "الماكينات ومواصفاتها", Icons.Default.Memory, Routes.MODELS),
+    MoreEntry("الشركات المصنعة", "كل الشركات وعدد موديلاتها", Icons.Default.Business, Routes.brands(0)),
+    MoreEntry("قائمة الموديلات", "الماكينات ومواصفاتها", Icons.Default.Memory, Routes.modelsFor(0, 0)),
+    MoreEntry("تشخيص الأعطال", "ابحث بالعَرَض أو الكود", Icons.Default.MedicalServices, Routes.DIAGNOSE),
+    MoreEntry("سجل الصيانة", "زياراتك وتقارير PDF", Icons.Default.Build, Routes.JOBS),
     MoreEntry("أدلة التركيب", "خطوات وقوائم فحص", Icons.Default.Construction, Routes.guides(GuideType.INSTALL)),
     MoreEntry("أدلة البرمجة", "برمجة وضبط", Icons.Default.Settings, Routes.guides(GuideType.PROGRAMMING)),
     MoreEntry("التوصيلات الكهربائية", "قواعد وملاحظات التوصيل", Icons.Default.ElectricalServices, Routes.guides(GuideType.WIRING)),
@@ -107,7 +112,7 @@ private val moreEntries = listOf(
 fun MoreScreen(nav: NavController) {
     Scaffold(topBar = { HamoTopBar("المزيد") }) { pad ->
         LazyColumn(Modifier.padding(pad).fillMaxSize(), contentPadding = PaddingValues(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            items(moreEntries, key = { it.route }) { e ->
+            items(moreEntries, key = { it.label }) { e ->
                 ListCard(
                     title = e.label, subtitle = e.hint,
                     trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null) },

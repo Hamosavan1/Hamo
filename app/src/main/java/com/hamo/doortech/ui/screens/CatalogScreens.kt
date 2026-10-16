@@ -162,7 +162,7 @@ fun BrandsScreen(nav: NavController) {
                                 IconButton(onClick = { editing = b }) { Icon(Icons.Default.Edit, "تعديل") }
                                 IconButton(onClick = { deleting = b }) { Icon(Icons.Default.Delete, "حذف") }
                             },
-                            onClick = { nav.navigate(Routes.MODELS) },
+                            onClick = { nav.navigate(Routes.modelsFor(b.id, 0)) },
                         )
                     }
                 }
@@ -240,56 +240,6 @@ fun MachineIcon(brandName: String?, modelName: String, size: androidx.compose.ui
 }
 
 @Composable
-fun ModelsScreen(nav: NavController) {
-    val container = LocalContainer.current
-    val vm = hamoVm { CatalogViewModel(container.repo) }
-    val models by vm.models.collectAsStateWithLifecycle()
-    val names by vm.names.collectAsStateWithLifecycle()
-    var brandFilter by remember { mutableStateOf<Long?>(null) }
-    var text by remember { mutableStateOf("") }
-
-    Scaffold(
-        topBar = { HamoTopBar("قائمة الموديلات", onBack = { nav.popBackStack() }) },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { nav.navigate(Routes.modelEdit(0, brandFilter ?: 0)) }, icon = { Icon(Icons.Default.Add, null) }, text = { Text("موديل جديد") })
-        },
-    ) { pad ->
-        Column(Modifier.padding(pad).fillMaxSize()) {
-            val n = (names as? UiState.Success)?.value
-            Column(Modifier.padding(14.dp, 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                FormField("بحث في الموديلات", text, { text = it }, placeholder = "اسم الموديل أو وحدة التحكم")
-                if (n != null) {
-                    DropdownField(
-                        "الشركة",
-                        listOf<Pair<Long?, String>>(null to "كل الشركات") + n.brands.map { it.key as Long? to it.value },
-                        brandFilter, { brandFilter = it },
-                    )
-                }
-            }
-            StateContent(models, "لا توجد موديلات", "أضف موديلات الماكينات لربط الأعطال والأدلة بها.", isEmpty = { it.isEmpty() }) { all ->
-                val q = text.trim().lowercase()
-                val list = all.filter { m ->
-                    (brandFilter == null || m.brandId == brandFilter) &&
-                        (q.isEmpty() || m.name.lowercase().contains(q) || m.controlUnit.lowercase().contains(q))
-                }
-                if (list.isEmpty()) EmptyState("لا توجد نتائج", "غيّر الشركة أو كلمة البحث.")
-                else LazyColumn(contentPadding = PaddingValues(14.dp, 4.dp, 14.dp, 90.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(list, key = { it.id }) { m ->
-                        ListCard(
-                            title = m.name.ltr(),
-                            subtitle = listOfNotNull(n?.brands?.get(m.brandId), n?.category(m.categoryId)).joinToString(" • "),
-                            badges = { if (m.isSeed) SeedBadge() },
-                            leading = { MachineIcon(brandName = n?.brands?.get(m.brandId), modelName = m.name) },
-                            onClick = { nav.navigate(Routes.model(m.id)) },
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun ModelEditScreen(nav: NavController, id: Long, presetBrand: Long) {
     val container = LocalContainer.current
     val messenger = LocalMessenger.current
@@ -308,7 +258,7 @@ fun ModelEditScreen(nav: NavController, id: Long, presetBrand: Long) {
                 if (brandList.isEmpty()) {
                     SectionCard("لا توجد شركات") {
                         Text("أضف شركة مصنعة أولًا ثم ارجع لإضافة الموديل.")
-                        SecondaryButton("إضافة شركة", { nav.navigate(Routes.BRANDS) })
+                        SecondaryButton("إضافة شركة", { nav.navigate(Routes.BRANDS_ADMIN) })
                     }
                 }
                 var nameError by remember { mutableStateOf<String?>(null) }
@@ -340,62 +290,3 @@ fun ModelEditScreen(nav: NavController, id: Long, presetBrand: Long) {
     }
 }
 
-@Composable
-fun ModelDetailScreen(nav: NavController, id: Long) {
-    val container = LocalContainer.current
-    val messenger = LocalMessenger.current
-    val vm = hamoVm(key = "model_$id") { ModelDetailViewModel(container.repo, id) }
-    val state by vm.detail.collectAsStateWithLifecycle()
-    val fav by vm.isFavorite.collectAsStateWithLifecycle()
-    var confirmDelete by remember { mutableStateOf(false) }
-
-    Scaffold(topBar = {
-        HamoTopBar("تفاصيل الماكينة", onBack = { nav.popBackStack() }) {
-            IconButton(onClick = vm::toggleFavorite) { Icon(if (fav) Icons.Default.Star else Icons.Default.StarBorder, "مفضلة") }
-            IconButton(onClick = { nav.navigate(Routes.modelEdit(id)) }) { Icon(Icons.Default.Edit, "تعديل") }
-            IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, "حذف") }
-        }
-    }) { pad ->
-        StateContent(state, isEmpty = { it == null }, emptyTitle = "الموديل غير موجود") { d ->
-            if (d == null) return@StateContent
-            ScrollColumn(pad) {
-                SectionCard(d.model.name.ltr()) {
-                    if (d.model.isSeed) SeedBadge()
-                    InfoRow("الشركة", d.brandName.orEmpty().ltr())
-                    InfoRow("نوع الباب", d.categoryName.orEmpty())
-                    InfoRow("وحدة التحكم", d.model.controlUnit.ltr())
-                    InfoRow("المواصفات", d.model.specs)
-                    InfoRow("الريموت", d.model.remoteInfo)
-                    InfoRow("الحساسات", d.model.sensorsInfo)
-                    InfoRow("المصدر", d.model.source)
-                    InfoRow("ملاحظات", d.model.notes)
-                }
-                SectionCard("الأعطال المرتبطة (${d.faults.size})") {
-                    if (d.faults.isEmpty()) Text("لا توجد أعطال مسجلة لهذا الموديل.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    d.faults.forEach { f ->
-                        TextButton(onClick = { nav.navigate(Routes.fault(f.id)) }) { Text(f.title) }
-                    }
-                    SecondaryButton("إضافة عطل لهذا الموديل", { nav.navigate(Routes.faultEdit(0, id)) }, Modifier.fillMaxWidth())
-                }
-                SectionCard("الأدلة المرتبطة (${d.guides.size})") {
-                    if (d.guides.isEmpty()) Text("لا توجد أدلة مرتبطة.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    d.guides.forEach { g -> TextButton(onClick = { nav.navigate(Routes.guide(g.id)) }) { Text(g.title) } }
-                }
-                SectionCard("قطع الغيار (${d.parts.size})") {
-                    if (d.parts.isEmpty()) Text("لا توجد قطع مسجلة لهذا الموديل.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    d.parts.forEach { p -> Text("• ${p.name} ${p.partNumber.ltr()} — المخزون: ${p.quantity}") }
-                }
-                MediaSection(OwnerType.MODEL, id)
-            }
-        }
-    }
-
-    if (confirmDelete) {
-        ConfirmDialog("حذف الموديل", "سيُحذف الموديل ومرفقاته. لا يمكن الحذف إن كانت هناك أعطال أو أدلة أو زيارات مرتبطة به.", "حذف", true,
-            onConfirm = {
-                confirmDelete = false
-                vm.delete { r -> messenger.show(r.messageOr("تم حذف الموديل")); if (r is Outcome.Ok) nav.popBackStack() }
-            },
-            onDismiss = { confirmDelete = false })
-    }
-}

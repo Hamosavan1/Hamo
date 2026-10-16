@@ -3,9 +3,8 @@ package com.hamo.doortech.ui
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -35,7 +34,10 @@ import com.hamo.doortech.AppContainer
 import com.hamo.doortech.ui.components.LocalContainer
 import com.hamo.doortech.ui.components.LocalMessenger
 import com.hamo.doortech.ui.components.Messenger
+import com.hamo.doortech.ui.screens.AdminScreen
 import com.hamo.doortech.ui.screens.AiSearchScreen
+import com.hamo.doortech.ui.screens.BrandsListScreen
+import com.hamo.doortech.ui.screens.HamoSplash
 import com.hamo.doortech.ui.screens.BackupScreen
 import com.hamo.doortech.ui.screens.BrandsScreen
 import com.hamo.doortech.ui.screens.CategoriesScreen
@@ -66,8 +68,10 @@ object Routes {
     const val JOBS = "jobs"
     const val MORE = "more"
     const val CATEGORIES = "categories"
-    const val BRANDS = "brands"
-    const val MODELS = "models"
+    const val BRANDS = "brands?cat={cat}"
+    const val BRANDS_ADMIN = "brands_admin"
+    const val MODELS = "models?brand={brand}&cat={cat}"
+    const val ADMIN = "admin"
     const val PARTS = "parts"
     const val FAVORITES = "favorites"
     const val MEDIA = "media"
@@ -86,6 +90,8 @@ object Routes {
     const val JOB = "job/{id}"
     const val JOB_EDIT = "job_edit/{id}"
 
+    fun brands(cat: Long = 0) = "brands?cat=$cat"
+    fun modelsFor(brand: Long = 0, cat: Long = 0) = "models?brand=$brand&cat=$cat"
     fun ai(q: String = "") = "ai_search?q=${android.net.Uri.encode(q)}"
     fun model(id: Long) = "model/$id"
     fun modelEdit(id: Long, brand: Long = 0) = "model_edit/$id?brand=$brand"
@@ -103,9 +109,8 @@ private data class TopItem(val route: String, val label: String, val icon: Image
 
 private val topItems = listOf(
     TopItem(Routes.HOME, "الرئيسية", Icons.Default.Home),
+    TopItem(Routes.FAVORITES, "المفضلة", Icons.Default.FavoriteBorder),
     TopItem(Routes.SEARCH, "بحث", Icons.Default.Search),
-    TopItem(Routes.DIAGNOSE, "تشخيص", Icons.Default.MedicalServices),
-    TopItem(Routes.JOBS, "الصيانة", Icons.Default.Build),
     TopItem(Routes.MORE, "المزيد", Icons.Default.MoreHoriz),
 )
 
@@ -119,6 +124,11 @@ fun HamoRoot(container: AppContainer) {
     val messenger = remember { Messenger(snack, scope) }
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
+    var splash by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(true) }
+    if (splash) {
+        HamoSplash(onStart = { splash = false })
+        return
+    }
 
     CompositionLocalProvider(LocalContainer provides container, LocalMessenger provides messenger) {
         Scaffold(
@@ -160,8 +170,18 @@ fun HamoRoot(container: AppContainer) {
                 composable(Routes.JOBS) { JobsScreen(nav) }
                 composable(Routes.MORE) { MoreScreen(nav) }
                 composable(Routes.CATEGORIES) { CategoriesScreen(nav) }
-                composable(Routes.BRANDS) { BrandsScreen(nav) }
-                composable(Routes.MODELS) { ModelsScreen(nav) }
+                composable(Routes.BRANDS_ADMIN) { BrandsScreen(nav) }
+                composable(Routes.ADMIN) { AdminScreen(nav) }
+                composable(Routes.BRANDS, listOf(navArgument("cat") { type = NavType.LongType; defaultValue = 0L })) {
+                    BrandsListScreen(nav, it.arguments?.getLong("cat") ?: 0L)
+                }
+                composable(
+                    Routes.MODELS,
+                    listOf(
+                        navArgument("brand") { type = NavType.LongType; defaultValue = 0L },
+                        navArgument("cat") { type = NavType.LongType; defaultValue = 0L },
+                    ),
+                ) { ModelsScreen(nav, it.arguments?.getLong("brand") ?: 0L, it.arguments?.getLong("cat") ?: 0L) }
                 composable(Routes.PARTS) { PartsScreen(nav) }
                 composable(Routes.FAVORITES) { FavoritesScreen(nav) }
                 composable(Routes.MEDIA) { MediaLibraryScreen(nav) }
