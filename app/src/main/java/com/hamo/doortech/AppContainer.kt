@@ -26,11 +26,16 @@ class AppContainer(context: Context) {
 
     /** يحمّل البيانات التجريبية مرة واحدة فقط عند أول تشغيل على قاعدة فارغة. */
     suspend fun seedIfNeeded() {
-        if (prefs.getBoolean(KEY_SEEDED, false)) return
-        if (!repo.hasAnyData()) SeedData.populate(repo)
-        prefs.edit().putBoolean(KEY_SEEDED, true).apply()
+        if (!prefs.getBoolean(KEY_SEEDED, false)) {
+            if (!repo.hasAnyData()) SeedData.populate(repo)
+            prefs.edit().putBoolean(KEY_SEEDED, true).apply()
+        }
+        // البيانات المرجعية تُحمَّل/تُحدَّث لكل إصدار جديد (آمنة للتكرار) حتى على التثبيتات القديمة.
         if (!prefs.getBoolean(KEY_REF, false)) {
             com.hamo.doortech.data.repo.ReferenceData.populate(repo)
+            com.hamo.doortech.data.repo.ReferenceExtra.populate(repo)
+            com.hamo.doortech.data.repo.ReferenceImages.attach(appContext, repo)
+            com.hamo.doortech.data.repo.ReferenceImages.attachCatalogLinks(repo)
             prefs.edit().putBoolean(KEY_REF, true).apply()
         }
     }
@@ -44,6 +49,6 @@ class AppContainer(context: Context) {
 
     companion object {
         private const val KEY_SEEDED = "seed_done_v1"
-        private const val KEY_REF = "ref_sliding_v2"
+        private const val KEY_REF = "ref_sliding_v6"
     }
 }

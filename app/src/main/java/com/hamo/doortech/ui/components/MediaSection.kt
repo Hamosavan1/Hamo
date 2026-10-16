@@ -45,6 +45,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -202,7 +206,7 @@ fun MediaSection(ownerType: String, ownerId: Long, modifier: Modifier = Modifier
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(images, key = { it.id }) { m ->
                                 Box {
-                                    Thumbnail(container.mediaStore.fileFor(m.path), Modifier.size(96.dp).clip(RoundedCornerShape(10.dp)).clickable { viewing = m })
+                                    Thumbnail(container.mediaStore.fileFor(m.path), Modifier.size(170.dp).clip(RoundedCornerShape(10.dp)).clickable { viewing = m })
                                     if (m.role != MediaRole.NONE) {
                                         Chip(MediaRole.label(m.role), Color(0xFF0B1F3A), Color.White)
                                     }
@@ -266,16 +270,55 @@ fun MediaSection(ownerType: String, ownerId: Long, modifier: Modifier = Modifier
     }
 
     viewing?.let { m ->
-        androidx.compose.ui.window.Dialog(onDismissRequest = { viewing = null }) {
-            Box(Modifier.fillMaxWidth().background(Color.Black, RoundedCornerShape(12.dp)).padding(8.dp)) {
-                Thumbnail(container.mediaStore.fileFor(m.path), Modifier.fillMaxWidth(), maxPx = 1600, fit = ContentScale.Fit)
-                IconButton(onClick = { viewing = null }, Modifier.align(Alignment.TopEnd)) {
-                    Icon(Icons.Default.Close, "إغلاق", tint = Color.White)
-                }
-            }
+        androidx.compose.ui.window.Dialog(
+            onDismissRequest = { viewing = null },
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = false),
+        ) {
+            ZoomableImage(container.mediaStore.fileFor(m.path), m.title) { viewing = null }
         }
     }
 }
+
+/** عارض ملء الشاشة: تكبير بالقرص (حتى 8×)، تحريك بالسحب، ضغطتان للتكبير/الرجوع. */
+@Composable
+fun ZoomableImage(file: File, title: String, onClose: () -> Unit) {
+    val img = rememberImage(file, 4096)
+    var scale by androidx.compose.runtime.remember { androidx.compose.runtime.mutableFloatStateOf(1f) }
+    var offset by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
+    Box(Modifier.fillMaxSize().background(Color.Black)) {
+        if (img != null) {
+            Image(
+                bitmap = img, contentDescription = title, contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .androidx_pointer(
+                        onTransform = { centroidShift, zoom ->
+                            val ns = (scale * zoom).coerceIn(1f, 8f)
+                            scale = ns
+                            offset = if (ns <= 1f) androidx.compose.ui.geometry.Offset.Zero else offset + centroidShift
+                        },
+                        onDoubleTap = {
+                            if (scale > 1f) { scale = 1f; offset = androidx.compose.ui.geometry.Offset.Zero } else scale = 3f
+                        },
+                    )
+                    .graphicsLayer(scaleX = scale, scaleY = scale, translationX = offset.x, translationY = offset.y),
+            )
+        } else {
+            Text("تعذّر عرض الصورة", color = Color.White, modifier = Modifier.align(Alignment.Center))
+        }
+        Row(Modifier.fillMaxWidth().align(Alignment.TopCenter).background(Color(0x99000000)).padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onClose) { Icon(Icons.Default.Close, "إغلاق", tint = Color.White) }
+            Text(if (title.isBlank()) "اقرص للتكبير • اضغط مرتين للتكبير السريع" else title, color = Color.White, maxLines = 1)
+        }
+    }
+}
+
+private fun Modifier.androidx_pointer(
+    onTransform: (androidx.compose.ui.geometry.Offset, Float) -> Unit,
+    onDoubleTap: () -> Unit,
+): Modifier = this
+    .pointerInput(Unit) { detectTapGestures(onDoubleTap = { onDoubleTap() }) }
+    .pointerInput(Unit) { detectTransformGestures { _, pan, zoom, _ -> onTransform(pan, zoom) } }
 
 @Composable
 fun Thumbnail(file: File, modifier: Modifier = Modifier, maxPx: Int = 300, fit: ContentScale = ContentScale.Crop) {
