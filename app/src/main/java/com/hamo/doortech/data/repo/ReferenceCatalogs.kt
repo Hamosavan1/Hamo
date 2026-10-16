@@ -49,7 +49,7 @@ object ReferenceCatalogs {
     private val obsoleteGuideTitles = listOf("Nice RD400 — مخطط التوصيل (الشكل 7)")
 
     private fun all(): List<CatModel> =
-        CatalogsNice.models() + CatalogsBft.models() + CatalogsLife.models() + CatalogsOther.models()
+        CatalogsNice.models() + CatalogsBeninca.models() + CatalogsBft.models() + CatalogsLife.models() + CatalogsOther.models()
 
     suspend fun populate(context: Context, repo: AppRepository) {
         for (t in obsoleteGuideTitles) {
