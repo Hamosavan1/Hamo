@@ -36,6 +36,7 @@ class AppContainer(context: Context) {
             com.hamo.doortech.data.repo.ReferenceExtra.populate(repo)
             com.hamo.doortech.data.repo.ReferenceImages.attach(appContext, repo)
             com.hamo.doortech.data.repo.ReferenceImages.attachCatalogLinks(repo)
+            com.hamo.doortech.data.repo.ReferenceCatalogs.populate(appContext, repo)
             prefs.edit().putBoolean(KEY_REF, true).apply()
         }
     }
@@ -49,6 +50,6 @@ class AppContainer(context: Context) {
 
     companion object {
         private const val KEY_SEEDED = "seed_done_v1"
-        private const val KEY_REF = "ref_sliding_v6"
+        private const val KEY_REF = "ref_sliding_v7"
     }
 }
