@@ -110,44 +110,110 @@ fun HomeScreen(nav: NavController) {
 
     Scaffold(topBar = { HamoTopBar("HAMO DOOR TECH") }) { pad ->
         LazyColumn(
-            Modifier.padding(pad).fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            Modifier.padding(pad).fillMaxSize().background(Color(0xFFF4F7FB)),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 22.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item {
                 Box(
-                    Modifier.fillMaxWidth().background(Brush.horizontalGradient(listOf(Navy, NavyLight)), RoundedCornerShape(18.dp)).padding(20.dp)
+                    Modifier.fillMaxWidth()
+                        .background(Brush.linearGradient(listOf(Color(0xFF071A31), Navy, Color(0xFF24517B))), RoundedCornerShape(24.dp))
+                        .padding(20.dp)
                 ) {
-                    Column {
-                        Text("مرحبًا بالفني", color = Color.White, style = MaterialTheme.typography.titleLarge)
-                        Spacer(Modifier.height(4.dp))
-                        Text("دليلك الفني لصيانة الأبواب والبوابات الأوتوماتيك — يعمل دون إنترنت.", color = Color(0xFFE2E8F0), style = MaterialTheme.typography.bodyMedium)
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Box(Modifier.size(42.dp).background(Color(0x33FFFFFF), RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.Build, null, tint = Orange, modifier = Modifier.size(25.dp))
+                            }
+                            Column {
+                                Text("HAMO DOOR TECH", color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+                                Text("المكتبة الفنية للفنيين", color = Color(0xFFCBD5E1), style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                        Text("كل معلومة فنية في مكان واحد", color = Color.White, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text(
+                            "كتالوجات • توصيلات • برمجة • ريموتات • أعطال",
+                            color = Color(0xFFE2E8F0),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.background(Orange, RoundedCornerShape(10.dp)).clickable { nav.goTop(Routes.SEARCH) }.padding(horizontal = 14.dp, vertical = 10.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Icon(Icons.Default.Search, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                    Text("ابحث الآن", color = Color.White, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            Box(Modifier.background(Color(0x26FFFFFF), RoundedCornerShape(10.dp)).padding(horizontal = 12.dp, vertical = 10.dp)) {
+                                Text("يعمل دون إنترنت", color = Color.White, style = MaterialTheme.typography.labelLarge)
+                            }
+                        }
                     }
                 }
             }
             item {
                 Card(
                     Modifier.fillMaxWidth().clickable { nav.goTop(Routes.SEARCH) },
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                 ) {
-                    Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Icon(Icons.Default.Search, null, tint = Orange)
-                        Text("ابحث عن عطل أو موديل أو كود خطأ...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(Modifier.padding(horizontal = 15.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Box(Modifier.size(42.dp).background(Color(0xFFFFF1E6), RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Search, null, tint = Orange)
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Text("ابحث عن مكينة أو عطل", color = Navy, fontWeight = FontWeight.Bold)
+                            Text("اسم الشركة، رقم الموديل أو كود الخطأ", color = Color(0xFF64748B), style = MaterialTheme.typography.bodySmall)
+                        }
+                        Icon(Icons.Default.Tune, null, tint = Color(0xFF64748B))
                     }
                 }
             }
             item {
+                Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                    Text("تصفّح حسب نوع البوابة", style = MaterialTheme.typography.titleMedium, color = Navy, fontWeight = FontWeight.Bold)
+                    Text("اختار نوع النظام للوصول للمكينات والأدلة المناسبة", color = Color(0xFF64748B), style = MaterialTheme.typography.bodySmall)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                        GateTypeCard(
+                            title = "أبواب الجراج العلوية",
+                            subtitle = "Overhead",
+                            icon = Icons.Default.Construction,
+                            modifier = Modifier.weight(1f),
+                            onClick = { nav.navigate(Routes.CATEGORIES) },
+                        )
+                        GateTypeCard(
+                            title = "بوابات منزلقة",
+                            subtitle = "Sliding",
+                            icon = Icons.Default.Category,
+                            modifier = Modifier.weight(1f),
+                            onClick = { nav.navigate(Routes.CATEGORIES) },
+                        )
+                        GateTypeCard(
+                            title = "ضلفتين",
+                            subtitle = "Swing",
+                            icon = Icons.Default.Build,
+                            modifier = Modifier.weight(1f),
+                            onClick = { nav.navigate(Routes.CATEGORIES) },
+                        )
+                    }
+                }
+            }
+            item {
+                Text("نظرة سريعة", style = MaterialTheme.typography.titleMedium, color = Navy, fontWeight = FontWeight.Bold)
                 when (val s = stats) {
                     is UiState.Success -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        StatBox("الأعطال", s.value.faults, Modifier.weight(1f))
-                        StatBox("الأدلة", s.value.guides, Modifier.weight(1f))
                         StatBox("الموديلات", s.value.models, Modifier.weight(1f))
+                        StatBox("الأدلة", s.value.guides, Modifier.weight(1f))
+                        StatBox("الأعطال", s.value.faults, Modifier.weight(1f))
                         StatBox("الزيارات", s.value.jobs, Modifier.weight(1f))
                     }
                     else -> Unit
                 }
+            }
+            item {
+                Text("استكشف المكتبة الفنية", style = MaterialTheme.typography.titleMedium, color = Navy, fontWeight = FontWeight.Bold)
+                Text("اختار القسم اللي تحتاجه", color = Color(0xFF64748B), style = MaterialTheme.typography.bodySmall)
             }
             items(tiles.chunked(2)) { pair ->
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -157,12 +223,25 @@ fun HomeScreen(nav: NavController) {
                     if (pair.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
-            item { Text("آخر الزيارات", style = MaterialTheme.typography.titleMedium) }
+            item {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("آخر الزيارات", style = MaterialTheme.typography.titleMedium, color = Navy, fontWeight = FontWeight.Bold)
+                    TextButton(onClick = { nav.goTop(Routes.JOBS) }) { Text("عرض الكل") }
+                }
+            }
             when (val s = stats) {
                 is UiState.Success -> {
                     if (s.value.recentJobs.isEmpty()) {
                         item {
-                            Text("لا توجد زيارات صيانة بعد. أضف أول زيارة من تبويب «الصيانة».", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                                Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    Icon(Icons.Default.Build, null, tint = Orange)
+                                    Column {
+                                        Text("لسه مفيش زيارات صيانة", color = Navy, fontWeight = FontWeight.Bold)
+                                        Text("أضف أول زيارة من تبويب الصيانة لمتابعة شغلك.", color = Color(0xFF64748B), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                }
+                            }
                         }
                     } else {
                         items(s.value.recentJobs, key = { it.id }) { j ->
@@ -176,7 +255,7 @@ fun HomeScreen(nav: NavController) {
                     }
                 }
                 is UiState.Error -> item { Text(s.message, color = MaterialTheme.colorScheme.error) }
-                UiState.Loading -> item { Text("جارٍ التحميل...") }
+                UiState.Loading -> item { Text("جارٍ التحميل...", color = Color(0xFF64748B)) }
             }
             item { Spacer(Modifier.height(8.dp)) }
         }
@@ -194,18 +273,50 @@ private fun StatBox(label: String, value: Int, modifier: Modifier) {
 }
 
 @Composable
+private fun GateTypeCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = modifier.clickable { onClick() },
+        shape = RoundedCornerShape(17.dp),
+        colors = CardDefaults.cardColors(containerColor = Navy),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = 9.dp, vertical = 13.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            Box(Modifier.size(38.dp).background(Color(0x26FFFFFF), RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+                Icon(icon, null, tint = Orange, modifier = Modifier.size(22.dp))
+            }
+            Text(title, color = Color.White, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, maxLines = 2)
+            Text(subtitle, color = Color(0xFFCBD5E1), style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+@Composable
 private fun TileCard(t: Tile, modifier: Modifier, onClick: () -> Unit) {
     Card(
         modifier.clickable { onClick() },
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
-        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Box(Modifier.size(40.dp).background(Color(0xFFFFEDD5), RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
-                Icon(t.icon, null, tint = Orange)
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 15.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(Modifier.size(44.dp).background(Color(0xFFFFF1E6), RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+                Icon(t.icon, null, tint = Orange, modifier = Modifier.size(23.dp))
             }
-            Text(t.label, style = MaterialTheme.typography.titleMedium, color = Navy)
+            Text(t.label, style = MaterialTheme.typography.bodyMedium, color = Navy, fontWeight = FontWeight.Bold, minLines = 2)
         }
     }
 }
