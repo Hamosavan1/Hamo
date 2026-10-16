@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ElectricalServices
 import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.Link
@@ -222,7 +223,7 @@ fun FavoritesScreen(nav: NavController) {
                     items(list, key = { "${it.type}_${it.id}" }) { f ->
                         ListCard(
                             title = f.title, subtitle = f.subtitle,
-                            trailing = { IconButton(onClick = { vm.remove(f) }) { Icon(Icons.Default.Star, "إزالة من المفضلة", tint = com.hamo.doortech.ui.theme.Orange) } },
+                            trailing = { IconButton(onClick = { vm.remove(f) }) { Icon(Icons.Default.Favorite, "إزالة من المفضلة", tint = androidx.compose.ui.graphics.Color(0xFFDC2626)) } },
                             onClick = {
                                 nav.navigate(
                                     when (f.type) {

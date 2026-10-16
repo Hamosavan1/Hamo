@@ -519,8 +519,17 @@ fun ModelDetailScreen(nav: NavController, id: Long) {
                         label.startsWith("الأعطال") -> {
                             if (d.faults.isEmpty()) Text("لا توجد أعطال مسجلة لهذا الموديل.", color = Color(0xFF64748B))
                             d.faults.forEach { f ->
-                                ListCard(title = f.title, onClick = { nav.navigate(Routes.fault(f.id)) },
-                                    trailing = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null) })
+                                Row(
+                                    Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color.White)
+                                        .clickable { nav.navigate(Routes.fault(f.id)) }.padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    Box(Modifier.size(44.dp).background(Orange, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Default.MedicalServices, null, tint = Color.White)
+                                    }
+                                    Text(f.title, Modifier.weight(1f), fontWeight = FontWeight.Bold, color = Navy)
+                                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null, tint = Color(0xFF94A3B8))
+                                }
                             }
                             TextButton(onClick = { nav.navigate(Routes.faultEdit(0, id)) }) { Text("إضافة عطل لهذا الموديل") }
                         }
