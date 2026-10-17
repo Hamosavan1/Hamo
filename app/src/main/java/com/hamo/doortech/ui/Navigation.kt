@@ -136,7 +136,7 @@ fun HamoRoot(container: AppContainer) {
             snackbarHost = { SnackbarHost(snack) },
             bottomBar = {
                 if (topItems.any { it.route == route }) {
-                    NavigationBar(containerColor = androidx.compose.ui.graphics.Color.White) {
+                    NavigationBar(containerColor = androidx.compose.ui.graphics.Color(0xFF101A2A)) {
                         topItems.forEach { item ->
                             NavigationBarItem(
                                 selected = route == item.route,
@@ -150,9 +150,11 @@ fun HamoRoot(container: AppContainer) {
                                 icon = { Icon(item.icon, null) },
                                 label = { Text(item.label) },
                                 colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = com.hamo.doortech.ui.theme.Navy,
-                                    selectedTextColor = com.hamo.doortech.ui.theme.Navy,
-                                    indicatorColor = com.hamo.doortech.ui.theme.OrangeSoft,
+                                    selectedIconColor = com.hamo.doortech.ui.theme.Orange,
+                                    selectedTextColor = com.hamo.doortech.ui.theme.Orange,
+                                    unselectedIconColor = androidx.compose.ui.graphics.Color(0xFF93A4BB),
+                                    unselectedTextColor = androidx.compose.ui.graphics.Color(0xFF93A4BB),
+                                    indicatorColor = androidx.compose.ui.graphics.Color(0xFF3A281A),
                                 ),
                             )
                         }

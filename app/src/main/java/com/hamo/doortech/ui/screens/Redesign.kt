@@ -202,14 +202,14 @@ fun HomeScreen(nav: NavController) {
     val stats by home.stats.collectAsStateWithLifecycle()
     val catList = (cats as? UiState.Success)?.value ?: emptyList()
 
-    Column(Modifier.fillMaxSize().background(Surface)) {
-        // الشريط العلوي الكحلي
+    Column(Modifier.fillMaxSize().background(DeepNavy)) {
+        // رأس داكن بتدرج صناعي
         Column(
-            Modifier.fillMaxWidth().background(Navy).padding(16.dp, 18.dp, 16.dp, 20.dp),
+            Modifier.fillMaxWidth().background(Brush.horizontalGradient(listOf(Color(0xFF101D30), Color(0xFF172B43)))).padding(18.dp, 20.dp, 18.dp, 22.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.size(38.dp).clip(RoundedCornerShape(11.dp)).background(NavyLight), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Brush.linearGradient(listOf(Color(0xFF263B55), Color(0xFF17263B)))), contentAlignment = Alignment.Center) {
                     Icon(Icons.Default.Build, null, tint = Orange, modifier = Modifier.size(20.dp))
                 }
                 Column(Modifier.weight(1f)) {
@@ -218,28 +218,30 @@ fun HomeScreen(nav: NavController) {
                 }
             }
             Row(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color.White)
-                    .clickable { nav.goTop(Routes.SEARCH) }.padding(horizontal = 14.dp, vertical = 13.dp),
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color(0xFF202D40))
+                    .border(1.dp, PanelBorder, RoundedCornerShape(16.dp))
+                    .clickable { nav.goTop(Routes.SEARCH) }.padding(horizontal = 15.dp, vertical = 15.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Icon(Icons.Default.Search, null, tint = TextSecondary)
+                Icon(Icons.Default.Search, null, tint = Orange)
                 Text("ابحث عن ماكينة أو ماركة أو موديل...", color = TextSecondary, fontSize = 13.sp)
             }
         }
 
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             // بطاقة ترويجية
             Column(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
-                    .background(Brush.horizontalGradient(listOf(Navy, NavyLight)))
-                    .padding(18.dp),
+                    .background(Brush.horizontalGradient(listOf(Color(0xFF172B43), Color(0xFF263D59))))
+                    .border(1.dp, PanelBorder, RoundedCornerShape(20.dp))
+                    .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text("حلول متكاملة", color = Orange, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp)
-                Text("لجميع أنواع الأبواب الأوتوماتيكية", color = Color.White, fontSize = 14.sp, lineHeight = 20.sp)
+                Text("مركز التحكم الفني", color = Orange, fontWeight = FontWeight.ExtraBold, fontSize = 21.sp)
+                Text("كل ما تحتاجه لصيانة وبرمجة الأبواب والبوابات الأوتوماتيكية في مكان واحد.", color = Color(0xFFD6E0EE), fontSize = 14.sp, lineHeight = 22.sp)
                 TextButton(onClick = { nav.navigate(Routes.brands(0)) }, contentPadding = PaddingValues(0.dp)) {
                     Text("تصفّح الماركات", color = OrangeLight, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null, tint = OrangeLight, modifier = Modifier.size(18.dp))
@@ -247,20 +249,20 @@ fun HomeScreen(nav: NavController) {
             }
 
             // أنواع الأبواب
-            Text("تصفّح حسب نوع الباب", color = Navy, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            Text("تصفّح حسب نوع الباب", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 17.sp)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 catTiles.forEach { t ->
                     Column(
-                        Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(Color.White)
-                            .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
+                        Modifier.weight(1f).clip(RoundedCornerShape(17.dp)).background(Color(0xFF121D2D))
+                            .border(1.dp, CardBorder, RoundedCornerShape(17.dp))
                             .clickable { nav.navigate(Routes.brands(catList.idFor(t.key))) }
                             .padding(vertical = 16.dp, horizontal = 6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Box(Modifier.size(44.dp).clip(RoundedCornerShape(13.dp)).background(OrangeSoft), contentAlignment = Alignment.Center) {
+                        Box(Modifier.size(44.dp).clip(RoundedCornerShape(13.dp)).background(Color(0xFF3A281A)), contentAlignment = Alignment.Center) {
                             Icon(t.icon, null, tint = Orange, modifier = Modifier.size(24.dp))
                         }
-                        Text(t.title, color = Navy, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 2)
+                        Text(t.title, color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 2)
                     }
                 }
             }
@@ -276,7 +278,7 @@ fun HomeScreen(nav: NavController) {
             }
 
             // أدوات الفني
-            Text("أدوات الفني", color = Navy, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            Text("أدوات الفني", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 17.sp)
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 quickTiles.chunked(2).forEach { row ->
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -290,16 +292,16 @@ fun HomeScreen(nav: NavController) {
 
             // إرشادات السلامة
             Row(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color(0xFFFFF7ED))
-                    .border(1.dp, OrangeSoft, RoundedCornerShape(14.dp)).padding(12.dp),
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color(0xFF2B211A))
+                    .border(1.dp, Color(0xFF63401F), RoundedCornerShape(16.dp)).padding(14.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top,
             ) {
-                Icon(Icons.Default.MedicalServices, null, tint = Color(0xFF9A3412), modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.MedicalServices, null, tint = Orange, modifier = Modifier.size(20.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text("إرشاد سلامة سريع", color = Color(0xFF9A3412), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text("إرشاد سلامة سريع", color = OrangeLight, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     Text(
                         "افصل التغذية الكهربائية دائمًا قبل فتح أي لوحة تحكم، وتأكد من سلامة حساسات الأمان بعد كل صيانة.",
-                        color = Color(0xFF7C2D12), fontSize = 12.sp, lineHeight = 18.sp,
+                        color = Color(0xFFE5C6A7), fontSize = 12.sp, lineHeight = 18.sp,
                     )
                 }
             }
@@ -310,10 +312,10 @@ fun HomeScreen(nav: NavController) {
 @Composable
 private fun HomeStat(label: String, value: Int, modifier: Modifier) {
     Column(
-        modifier.clip(RoundedCornerShape(14.dp)).background(Color.White).border(1.dp, CardBorder, RoundedCornerShape(14.dp)).padding(vertical = 12.dp),
+        modifier.clip(RoundedCornerShape(14.dp)).background(Color(0xFF121D2D)).border(1.dp, CardBorder, RoundedCornerShape(14.dp)).padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("$value", color = Navy, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+        Text("$value", color = Orange, fontWeight = FontWeight.ExtraBold, fontSize = 21.sp)
         Text(label, color = TextSecondary, fontSize = 12.sp)
     }
 }
@@ -321,14 +323,14 @@ private fun HomeStat(label: String, value: Int, modifier: Modifier) {
 @Composable
 private fun OtherTile(label: String, icon: ImageVector, modifier: Modifier, onClick: () -> Unit) {
     Row(
-        modifier.clip(RoundedCornerShape(14.dp)).background(Color.White).border(1.dp, CardBorder, RoundedCornerShape(14.dp))
+        modifier.clip(RoundedCornerShape(14.dp)).background(Color(0xFF121D2D)).border(1.dp, CardBorder, RoundedCornerShape(14.dp))
             .clickable(onClick = onClick).padding(vertical = 12.dp, horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Box(Modifier.size(34.dp).clip(RoundedCornerShape(10.dp)).background(OrangeSoft), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(38.dp).clip(RoundedCornerShape(11.dp)).background(Color(0xFF3A281A)), contentAlignment = Alignment.Center) {
             Icon(icon, null, tint = Orange, modifier = Modifier.size(18.dp))
         }
-        Text(label, color = Navy, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 2)
+        Text(label, color = TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 2)
     }
 }
 

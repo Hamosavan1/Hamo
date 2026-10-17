@@ -250,7 +250,7 @@ fun SectionCard(title: String, modifier: Modifier = Modifier, content: @Composab
         shape = RoundedCornerShape(14.dp),
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = Navy)
+            Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
             content()
         }
     }
