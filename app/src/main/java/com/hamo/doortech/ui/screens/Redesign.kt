@@ -77,6 +77,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -105,6 +106,7 @@ import com.hamo.doortech.ui.components.MediaSection
 import com.hamo.doortech.ui.components.NumberedStep
 import com.hamo.doortech.ui.components.SectionCard
 import com.hamo.doortech.ui.components.StateContent
+import com.hamo.doortech.ui.components.StepCard
 import com.hamo.doortech.ui.components.VerificationBadge
 import com.hamo.doortech.ui.components.WarningBox
 import com.hamo.doortech.ui.components.goTop
@@ -520,17 +522,7 @@ private fun GuideBlock(nav: NavController, g: TechnicalGuide) {
                     Text("خطوات التنفيذ", color = Navy, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     Text(if (expanded) "إخفاء ▲" else "عرض الخطوات ▼", color = NavyLight, fontSize = 12.sp)
                 }
-                if (expanded) steps.forEachIndexed { i, step ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.Top) {
-                        Box(Modifier.size(30.dp).clip(CircleShape).background(Navy), contentAlignment = Alignment.Center) {
-                            Text("${i + 1}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        }
-                        Text(step.text, Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFF8FAFC)).padding(horizontal = 12.dp, vertical = 10.dp),
-                            color = Color(0xFF1E293B), fontSize = 14.sp, lineHeight = 23.sp)
-                    }
-                }
+                if (expanded) steps.forEachIndexed { i, step -> StepCard(i + 1, step.text) }
             } else {
                 Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
                     .background(Color(0xFFFFF7ED)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

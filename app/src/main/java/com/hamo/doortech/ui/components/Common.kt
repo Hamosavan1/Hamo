@@ -1,6 +1,7 @@
 package com.hamo.doortech.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -50,16 +52,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hamo.doortech.AppContainer
 import com.hamo.doortech.data.db.Verification
 import com.hamo.doortech.ui.UiState
 import com.hamo.doortech.ui.theme.Navy
+import com.hamo.doortech.ui.theme.NavyLight
 import com.hamo.doortech.ui.theme.Orange
 import com.hamo.doortech.ui.theme.OrangeSoft
 import com.hamo.doortech.ui.theme.WarnBg
@@ -305,6 +311,51 @@ fun NumberedStep(index: Int, text: String, done: Boolean? = null, onToggle: (() 
             }
         }
         Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+/** بطاقة خطوة فردية لأدلة البرمجة/التوصيلات: تفصل أي تحذير سلامة (مسبوق بعلامة ⚠ في النص
+ * المصدري) في صندوق بارز منفصل، وتطوي النص الطويل جدًا مع زر "عرض المزيد" بدل كتلة نصية
+ * واحدة ضخمة يصعب قراءتها. مُستخدمة في بطاقة الدليل المصغّرة وفي صفحة الدليل الكاملة معًا. */
+@Composable
+fun StepCard(index: Int, rawText: String) {
+    val parts = rawText.split("⚠", limit = 2)
+    val main = parts[0].trim()
+    val warn = parts.getOrNull(1)?.trim()
+    var expanded by remember(index, rawText) { mutableStateOf(main.length <= 220) }
+
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
+        Box(Modifier.size(30.dp).clip(CircleShape).background(Navy), contentAlignment = Alignment.Center) {
+            Text("$index", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFFF8FAFC))
+                    .then(if (!expanded) Modifier.clickable { expanded = true } else Modifier)
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+            ) {
+                Text(
+                    main, color = Color(0xFF1E293B), fontSize = 14.sp, lineHeight = 23.sp,
+                    maxLines = if (expanded) Int.MAX_VALUE else 4, overflow = TextOverflow.Ellipsis,
+                )
+                if (!expanded) {
+                    Text("عرض المزيد ▾", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 4.dp))
+                } else if (main.length > 220) {
+                    Text("عرض أقل ▴", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable { expanded = false }.padding(top = 4.dp))
+                }
+            }
+            if (!warn.isNullOrBlank()) {
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Color(0xFFFFF7ED))
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.Top,
+                ) {
+                    Text("⚠", fontSize = 13.sp)
+                    Text(warn, color = Color(0xFF9A3412), fontSize = 12.sp, lineHeight = 18.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
     }
 }
 

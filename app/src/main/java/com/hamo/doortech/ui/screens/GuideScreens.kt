@@ -51,10 +51,10 @@ import com.hamo.doortech.ui.components.LoadingBox
 import com.hamo.doortech.ui.components.LocalContainer
 import com.hamo.doortech.ui.components.LocalMessenger
 import com.hamo.doortech.ui.components.MediaSection
-import com.hamo.doortech.ui.components.NumberedStep
 import com.hamo.doortech.ui.components.PrimaryButton
 import com.hamo.doortech.ui.components.SectionCard
 import com.hamo.doortech.ui.components.SeedBadge
+import com.hamo.doortech.ui.components.StepCard
 import com.hamo.doortech.ui.components.StateContent
 import com.hamo.doortech.ui.components.StringListEditor
 import com.hamo.doortech.ui.components.VerificationBadge
@@ -132,10 +132,18 @@ fun GuideDetailScreen(nav: NavController, id: Long) {
                     InfoRow("المصدر", g.source)
                 }
                 WarningBox(g.warnings)
-                SectionCard("الخطوات") {
-                    d.full.orderedSteps.forEachIndexed { i, s -> NumberedStep(i + 1, s.text) }
+                SectionCard("الخطوات (${d.full.orderedSteps.size})") {
+                    if (d.full.orderedSteps.isEmpty()) {
+                        Text("لا توجد خطوات تفصيلية مسجّلة لهذا الدليل بعد.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            d.full.orderedSteps.forEachIndexed { i, s -> StepCard(i + 1, s.text) }
+                        }
+                    }
                 }
-                MediaSection(OwnerType.GUIDE, id)
+                SectionCard("الصور والمرفقات") {
+                    MediaSection(OwnerType.GUIDE, id)
+                }
             }
         }
     }
