@@ -13,11 +13,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 
-val Navy = Color(0xFF0B1F3A)
-val NavyLight = Color(0xFF1E3A5F)
-val Orange = Color(0xFFF97316)
+// لوحة الألوان الرسمية لهوية HAMO DOOR TECH (حسب الماستر-برومبت: كحلي صناعي + برتقالي).
+val Navy = Color(0xFF071A31)
+val NavyLight = Color(0xFF12365D)
+val Orange = Color(0xFFFF8A1D)
+val OrangeLight = Color(0xFFFFB36B)
 val OrangeSoft = Color(0xFFFFEDD5)
-val Surface = Color(0xFFF8FAFC)
+val Surface = Color(0xFFF3F6FB)
+val TextPrimary = Color(0xFF10233F)
+val TextSecondary = Color(0xFF64748B)
+val CardBorder = Color(0xFFE2E8F0)
 val OkGreen = Color(0xFF15803D)
 val WarnRed = Color(0xFFB91C1C)
 val WarnBg = Color(0xFFFEF2F2)
@@ -33,13 +38,13 @@ private val scheme = lightColorScheme(
     onSecondaryContainer = Color(0xFF7C2D12),
     tertiary = NavyLight,
     background = Surface,
-    onBackground = Color(0xFF0F172A),
+    onBackground = TextPrimary,
     surface = Color.White,
-    onSurface = Color(0xFF0F172A),
+    onSurface = TextPrimary,
     surfaceVariant = Color(0xFFEFF3F8),
-    onSurfaceVariant = Color(0xFF475569),
+    onSurfaceVariant = TextSecondary,
     error = WarnRed,
-    outline = Color(0xFFCBD5E1),
+    outline = CardBorder,
 )
 
 private val typography = Typography(

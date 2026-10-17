@@ -2,6 +2,7 @@ package com.hamo.doortech.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -106,9 +107,13 @@ import com.hamo.doortech.ui.components.VerificationBadge
 import com.hamo.doortech.ui.components.WarningBox
 import com.hamo.doortech.ui.components.goTop
 import com.hamo.doortech.ui.components.hamoVm
+import com.hamo.doortech.ui.theme.CardBorder
 import com.hamo.doortech.ui.theme.Navy
 import com.hamo.doortech.ui.theme.NavyLight
 import com.hamo.doortech.ui.theme.Orange
+import com.hamo.doortech.ui.theme.OrangeLight
+import com.hamo.doortech.ui.theme.Surface
+import com.hamo.doortech.ui.theme.TextSecondary
 import com.hamo.doortech.util.ltr
 import kotlinx.coroutines.delay
 
@@ -170,6 +175,19 @@ private val catTiles = listOf(
 
 private fun List<DoorCategory>.idFor(key: String): Long = firstOrNull { it.name.contains(key) }?.id ?: 0L
 
+private data class QuickTile(val title: String, val icon: ImageVector, val route: (NavController, Long) -> Unit)
+
+private val quickTiles = listOf(
+    QuickTile("الشركات والماركات", Icons.Default.Business) { nav, _ -> nav.navigate(Routes.brands(0)) },
+    QuickTile("الموديلات", Icons.Default.Category) { nav, _ -> nav.navigate(Routes.modelsFor(0, 0)) },
+    QuickTile("البرمجة", Icons.Default.Settings) { nav, _ -> nav.navigate(Routes.guides(GuideType.PROGRAMMING)) },
+    QuickTile("التوصيلات", Icons.Default.Memory) { nav, _ -> nav.navigate(Routes.guides(GuideType.WIRING)) },
+    QuickTile("الأعطال والحلول", Icons.Default.MedicalServices) { nav, _ -> nav.navigate(Routes.DIAGNOSE) },
+    QuickTile("قطع الغيار", Icons.Default.Handyman) { nav, _ -> nav.navigate(Routes.PARTS) },
+    QuickTile("سجل الصيانة", Icons.Default.Construction) { nav, _ -> nav.navigate(Routes.JOBS) },
+    QuickTile("المفضلة", Icons.Default.Star) { nav, _ -> nav.navigate(Routes.FAVORITES) },
+)
+
 @Composable
 fun HomeScreen(nav: NavController) {
     val container = LocalContainer.current
@@ -179,43 +197,70 @@ fun HomeScreen(nav: NavController) {
     val stats by home.stats.collectAsStateWithLifecycle()
     val catList = (cats as? UiState.Success)?.value ?: emptyList()
 
-    Box(Modifier.fillMaxSize().background(BgGradient)) {
+    Column(Modifier.fillMaxSize().background(Surface)) {
+        // الشريط العلوي الكحلي
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            Modifier.fillMaxWidth().background(Navy).padding(16.dp, 18.dp, 16.dp, 20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.size(40.dp).background(PanelNavy, CircleShape), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Build, null, tint = Orange, modifier = Modifier.size(22.dp))
+                Box(Modifier.size(38.dp).clip(RoundedCornerShape(11.dp)).background(NavyLight), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Build, null, tint = Orange, modifier = Modifier.size(20.dp))
                 }
-                Column {
-                    Text("HAMO", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                    Text("DOOR TECH", color = Orange, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Column(Modifier.weight(1f)) {
+                    Text("HAMO", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
+                    Text("DOOR TECH", color = Orange, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                 }
             }
-            // شريط البحث
             Row(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color.White)
-                    .clickable { nav.goTop(Routes.SEARCH) }.padding(horizontal = 14.dp, vertical = 14.dp),
+                    .clickable { nav.goTop(Routes.SEARCH) }.padding(horizontal = 14.dp, vertical = 13.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Icon(Icons.Default.Search, null, tint = Color(0xFF64748B))
-                Text("ابحث عن موديل أو شركة أو عطل...", color = Color(0xFF64748B))
+                Icon(Icons.Default.Search, null, tint = TextSecondary)
+                Text("ابحث عن ماكينة أو ماركة أو موديل...", color = TextSecondary, fontSize = 13.sp)
             }
-            // الأقسام الثلاثة
+        }
+
+        Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+        ) {
+            // بطاقة ترويجية
+            Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
+                    .background(Brush.horizontalGradient(listOf(Navy, NavyLight)))
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text("حلول متكاملة", color = Orange, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp)
+                Text("لجميع أنواع الأبواب الأوتوماتيكية", color = Color.White, fontSize = 14.sp, lineHeight = 20.sp)
+                TextButton(onClick = { nav.navigate(Routes.brands(0)) }, contentPadding = PaddingValues(0.dp)) {
+                    Text("تصفّح الماركات", color = OrangeLight, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null, tint = OrangeLight, modifier = Modifier.size(18.dp))
+                }
+            }
+
+            // أنواع الأبواب
+            Text("تصفّح حسب نوع الباب", color = Navy, fontWeight = FontWeight.Bold, fontSize = 15.sp)
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 catTiles.forEach { t ->
                     Column(
-                        Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(PanelNavy)
+                        Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(Color.White)
+                            .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
                             .clickable { nav.navigate(Routes.brands(catList.idFor(t.key))) }
                             .padding(vertical = 16.dp, horizontal = 6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Icon(t.icon, null, tint = Color.White, modifier = Modifier.size(38.dp))
-                        Text(t.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp, textAlign = TextAlign.Center)
+                        Box(Modifier.size(44.dp).clip(RoundedCornerShape(13.dp)).background(OrangeSoft), contentAlignment = Alignment.Center) {
+                            Icon(t.icon, null, tint = Orange, modifier = Modifier.size(24.dp))
+                        }
+                        Text(t.title, color = Navy, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 2)
                     }
                 }
             }
+
+            // إحصائيات حقيقية من قاعدة البيانات
             val s = (stats as? UiState.Success)?.value
             if (s != null) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -224,18 +269,34 @@ fun HomeScreen(nav: NavController) {
                     HomeStat("الأعطال", s.faults, Modifier.weight(1f))
                 }
             }
-            Text("أقسام أخرى", color = Orange, fontWeight = FontWeight.Bold, fontSize = 17.sp)
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OtherTile("تشخيص الأعطال", Icons.Default.MedicalServices, Modifier.weight(1f)) { nav.navigate(Routes.DIAGNOSE) }
-                OtherTile("الشركات", Icons.Default.Business, Modifier.weight(1f)) { nav.navigate(Routes.brands(0)) }
-                OtherTile("قطع الغيار", Icons.Default.Handyman, Modifier.weight(1f)) { nav.navigate(Routes.PARTS) }
-                OtherTile("الصيانة", Icons.Default.Construction, Modifier.weight(1f)) { nav.navigate(Routes.JOBS) }
+
+            // أدوات الفني
+            Text("أدوات الفني", color = Navy, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                quickTiles.chunked(2).forEach { row ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        row.forEach { t ->
+                            OtherTile(t.title, t.icon, Modifier.weight(1f)) { t.route(nav, 0L) }
+                        }
+                        if (row.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OtherTile("أدلة البرمجة", Icons.Default.Settings, Modifier.weight(1f)) { nav.navigate(Routes.guides(GuideType.PROGRAMMING)) }
-                OtherTile("التوصيلات", Icons.Default.Memory, Modifier.weight(1f)) { nav.navigate(Routes.guides(GuideType.WIRING)) }
-                OtherTile("بحث بالإنترنت", Icons.Default.Search, Modifier.weight(1f)) { nav.navigate(Routes.ai()) }
-                OtherTile("لوحة الإدارة", Icons.Default.Category, Modifier.weight(1f)) { nav.navigate(Routes.ADMIN) }
+
+            // إرشادات السلامة
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color(0xFFFFF7ED))
+                    .border(1.dp, OrangeSoft, RoundedCornerShape(14.dp)).padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top,
+            ) {
+                Icon(Icons.Default.MedicalServices, null, tint = Color(0xFF9A3412), modifier = Modifier.size(20.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text("إرشاد سلامة سريع", color = Color(0xFF9A3412), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text(
+                        "افصل التغذية الكهربائية دائمًا قبل فتح أي لوحة تحكم، وتأكد من سلامة حساسات الأمان بعد كل صيانة.",
+                        color = Color(0xFF7C2D12), fontSize = 12.sp, lineHeight = 18.sp,
+                    )
+                }
             }
         }
     }
@@ -244,22 +305,25 @@ fun HomeScreen(nav: NavController) {
 @Composable
 private fun HomeStat(label: String, value: Int, modifier: Modifier) {
     Column(
-        modifier.clip(RoundedCornerShape(12.dp)).background(Color(0x22FFFFFF)).padding(vertical = 10.dp),
+        modifier.clip(RoundedCornerShape(14.dp)).background(Color.White).border(1.dp, CardBorder, RoundedCornerShape(14.dp)).padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("$value", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-        Text(label, color = SoftText, fontSize = 12.sp)
+        Text("$value", color = Navy, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+        Text(label, color = TextSecondary, fontSize = 12.sp)
     }
 }
 
 @Composable
 private fun OtherTile(label: String, icon: ImageVector, modifier: Modifier, onClick: () -> Unit) {
-    Column(
-        modifier.clip(RoundedCornerShape(14.dp)).background(Color.White).clickable(onClick = onClick).padding(vertical = 12.dp, horizontal = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp),
+    Row(
+        modifier.clip(RoundedCornerShape(14.dp)).background(Color.White).border(1.dp, CardBorder, RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick).padding(vertical = 12.dp, horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Icon(icon, null, tint = Navy, modifier = Modifier.size(26.dp))
-        Text(label, color = Navy, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center, maxLines = 2)
+        Box(Modifier.size(34.dp).clip(RoundedCornerShape(10.dp)).background(OrangeSoft), contentAlignment = Alignment.Center) {
+            Icon(icon, null, tint = Orange, modifier = Modifier.size(18.dp))
+        }
+        Text(label, color = Navy, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 2)
     }
 }
 
