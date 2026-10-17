@@ -405,21 +405,88 @@ private fun GuideBlock(nav: NavController, g: TechnicalGuide) {
     val vm = hamoVm(key = "block_${g.id}") { GuideDetailViewModel(container.repo, g.id) }
     val state by vm.detail.collectAsStateWithLifecycle()
     val steps = (state as? UiState.Success)?.value?.full?.orderedSteps ?: emptyList()
+    var expanded by remember(g.id) { mutableStateOf(true) }
+
     Card(
-        Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(g.title, fontWeight = FontWeight.Bold, color = Navy, fontSize = 16.sp)
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { VerificationBadge(g.level) }
-            if (g.summary.isNotBlank()) Text(g.summary, style = MaterialTheme.typography.bodyMedium)
-            WarningBox(g.warnings)
-            steps.forEachIndexed { i, s -> NumberedStep(i + 1, s.text) }
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Color(0xFFFFEDD5)),
+                    contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Construction, contentDescription = null, tint = Orange, modifier = Modifier.size(24.dp))
+                }
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text(g.title, fontWeight = FontWeight.Bold, color = Navy, fontSize = 17.sp, lineHeight = 24.sp)
+                    Text(when (g.type) {
+                        GuideType.PROGRAMMING -> "دليل برمجة خطوة بخطوة"
+                        GuideType.WIRING -> "دليل التوصيلات"
+                        GuideType.REMOTE -> "دليل إعداد الريموت"
+                        GuideType.INSTALL -> "دليل التركيب"
+                        else -> "دليل فني"
+                    }, color = Color(0xFF64748B), fontSize = 12.sp)
+                }
+            }
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween) {
+                VerificationBadge(g.level)
+                Text(if (steps.isEmpty()) "الخطوات غير مضافة" else "${steps.size} خطوات",
+                    color = Color(0xFF475569), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+            }
+            if (g.summary.isNotBlank()) {
+                Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFFF1F5F9)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("قبل أن تبدأ", color = Navy, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(g.summary, color = Color(0xFF334155), fontSize = 14.sp, lineHeight = 22.sp)
+                }
+            }
+            if (g.warnings.isNotBlank()) WarningBox(g.warnings)
+            if (steps.isNotEmpty()) {
+                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFFEFF6FF))
+                    .clickable { expanded = !expanded }.padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("خطوات التنفيذ", color = Navy, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(if (expanded) "إخفاء ▲" else "عرض الخطوات ▼", color = NavyLight, fontSize = 12.sp)
+                }
+                if (expanded) steps.forEachIndexed { i, step ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.Top) {
+                        Box(Modifier.size(30.dp).clip(CircleShape).background(Navy), contentAlignment = Alignment.Center) {
+                            Text("${i + 1}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        }
+                        Text(step.text, Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFF8FAFC)).padding(horizontal = 12.dp, vertical = 10.dp),
+                            color = Color(0xFF1E293B), fontSize = 14.sp, lineHeight = 23.sp)
+                    }
+                }
+            } else {
+                Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFFFFF7ED)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("لا توجد خطوات تفصيلية حتى الآن", color = Color(0xFF9A3412), fontWeight = FontWeight.Bold)
+                    Text("أضف الخطوات من لوحة الإدارة، وراجع كتالوج الشركة المصنّعة قبل تنفيذ أي إعداد.",
+                        color = Color(0xFF7C2D12), fontSize = 13.sp, lineHeight = 20.sp)
+                }
+            }
+            Text("الصور والمرفقات", color = Navy, fontWeight = FontWeight.Bold, fontSize = 14.sp)
             MediaSection(OwnerType.GUIDE, g.id)
-            if (g.source.isNotBlank()) Text("المصدر: ${g.source}", color = Color(0xFF64748B), fontSize = 12.sp)
-            TextButton(onClick = { nav.navigate(Routes.guide(g.id)) }) { Text("فتح الصفحة كاملة / تعديل") }
+            if (g.source.isNotBlank()) {
+                Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xFFF8FAFC)).padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("المصدر الفني", color = Color(0xFF64748B), fontSize = 11.sp)
+                    Text(g.source, color = Color(0xFF334155), fontSize = 12.sp, lineHeight = 18.sp)
+                }
+            }
+            Button(onClick = { nav.navigate(Routes.guide(g.id)) }, modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = Navy)) {
+                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.size(8.dp))
+                Text("فتح الدليل كاملًا", fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
