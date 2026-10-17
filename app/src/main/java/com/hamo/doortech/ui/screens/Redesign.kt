@@ -35,11 +35,13 @@ import androidx.compose.material.icons.filled.DoorSliding
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Garage
 import androidx.compose.material.icons.filled.Handyman
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Construction
@@ -594,9 +596,9 @@ fun ModelDetailScreen(nav: NavController, id: Long) {
             val label = tabs[sel]
             val documented = d.guides.any { it.level == Verification.DOCUMENTED }
 
-            Column(Modifier.padding(pad).fillMaxSize().background(Color(0xFFF4F7FB))) {
+            Column(Modifier.padding(pad).fillMaxSize().background(Surface)) {
                 Row(
-                    Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(DeepNavy, NavyLight))).padding(14.dp),
+                    Modifier.fillMaxWidth().background(Navy).padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     MachineIcon(d.brandName, d.model.name, size = 84.dp)
@@ -615,13 +617,31 @@ fun ModelDetailScreen(nav: NavController, id: Long) {
                         }
                     }
                 }
-                ScrollableTabRow(
-                    selectedTabIndex = sel, edgePadding = 8.dp,
-                    containerColor = Color.White, contentColor = Navy,
+                Row(
+                    Modifier.fillMaxWidth().background(Color.White).horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     tabs.forEachIndexed { i, t ->
-                        Tab(selected = sel == i, onClick = { tab = i }, text = { Text(t, fontWeight = if (sel == i) FontWeight.Bold else FontWeight.Normal) },
-                            selectedContentColor = Navy, unselectedContentColor = Color(0xFF64748B))
+                        val selected = sel == i
+                        Row(
+                            Modifier.clip(RoundedCornerShape(14.dp))
+                                .background(if (selected) Navy else Color.White)
+                                .border(1.dp, if (selected) Navy else CardBorder, RoundedCornerShape(14.dp))
+                                .clickable { tab = i }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Icon(
+                                iconForTab(t), null,
+                                tint = if (selected) Color.White else Navy,
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Text(
+                                t, color = if (selected) Color.White else Navy, fontSize = 12.sp,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                            )
+                        }
                     }
                 }
                 Column(
@@ -683,6 +703,16 @@ fun ModelDetailScreen(nav: NavController, id: Long) {
             },
             onDismiss = { confirmDelete = false })
     }
+}
+
+private fun iconForTab(label: String): ImageVector = when {
+    label.startsWith("نظرة عامة") -> Icons.Default.Info
+    label.startsWith("التوصيلات") -> Icons.Default.Memory
+    label.startsWith("برمجة المكينة") -> Icons.Default.Settings
+    label.startsWith("برمجة الريموت") -> Icons.Default.SettingsRemote
+    label.startsWith("التركيب") -> Icons.Default.Build
+    label.startsWith("الأعطال") -> Icons.Default.MedicalServices
+    else -> Icons.Default.PhotoLibrary
 }
 
 @Composable
