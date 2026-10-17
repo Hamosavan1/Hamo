@@ -2,6 +2,7 @@ package com.hamo.doortech.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,6 +65,7 @@ import androidx.compose.ui.unit.sp
 import com.hamo.doortech.AppContainer
 import com.hamo.doortech.data.db.Verification
 import com.hamo.doortech.ui.UiState
+import com.hamo.doortech.ui.theme.CardBorder
 import com.hamo.doortech.ui.theme.Navy
 import com.hamo.doortech.ui.theme.NavyLight
 import com.hamo.doortech.ui.theme.Orange
@@ -322,7 +324,16 @@ fun StepCard(index: Int, rawText: String) {
     val parts = rawText.split("⚠", limit = 2)
     val main = parts[0].trim()
     val warn = parts.getOrNull(1)?.trim()
-    var expanded by remember(index, rawText) { mutableStateOf(main.length <= 220) }
+    // النصوص الحقيقية من الكتالوجات بتستخدم "•" كفاصل حقيقي بين بارامترات/مواصفات
+    // (موجود أصلاً في بيانات المصدر) — لو فيه أكتر من فاصل، نعرضها كقائمة واضحة
+    // بدل فقرة مزدحمة، بدل ما نفبرك أي حقول مش موجودة في البيانات.
+    val bulletItems = remember(main) {
+        val segs = main.split("•").map { it.trim() }.filter { it.isNotEmpty() }
+        if (segs.size >= 2) segs else null
+    }
+    var expanded by remember(index, rawText) {
+        mutableStateOf(if (bulletItems != null) bulletItems.size <= 5 else main.length <= 220)
+    }
 
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
         Box(Modifier.size(30.dp).clip(CircleShape).background(Navy), contentAlignment = Alignment.Center) {
@@ -330,31 +341,77 @@ fun StepCard(index: Int, rawText: String) {
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFFF8FAFC))
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFFF7F8FA))
+                    .border(1.dp, CardBorder, RoundedCornerShape(12.dp))
                     .then(if (!expanded) Modifier.clickable { expanded = true } else Modifier)
                     .padding(horizontal = 12.dp, vertical = 10.dp),
             ) {
-                Text(
-                    main, color = Color(0xFF1E293B), fontSize = 14.sp, lineHeight = 23.sp,
-                    maxLines = if (expanded) Int.MAX_VALUE else 4, overflow = TextOverflow.Ellipsis,
-                )
-                if (!expanded) {
-                    Text("عرض المزيد ▾", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 4.dp))
-                } else if (main.length > 220) {
-                    Text("عرض أقل ▴", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                        modifier = Modifier.clickable { expanded = false }.padding(top = 4.dp))
+                if (bulletItems != null) {
+                    val shown = if (expanded) bulletItems else bulletItems.take(5)
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        shown.forEach { seg -> ParameterRow(seg) }
+                    }
+                    if (!expanded) {
+                        Text(
+                            "+ ${bulletItems.size - 5} بنود أخرى — عرض الكل ▾",
+                            color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    } else if (bulletItems.size > 5) {
+                        Text("عرض أقل ▴", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clickable { expanded = false }.padding(top = 8.dp))
+                    }
+                } else {
+                    Text(
+                        main, color = Color(0xFF1E293B), fontSize = 14.sp, lineHeight = 23.sp,
+                        maxLines = if (expanded) Int.MAX_VALUE else 4, overflow = TextOverflow.Ellipsis,
+                    )
+                    if (!expanded) {
+                        Text("عرض المزيد ▾", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 4.dp))
+                    } else if (main.length > 220) {
+                        Text("عرض أقل ▴", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clickable { expanded = false }.padding(top = 4.dp))
+                    }
                 }
             }
             if (!warn.isNullOrBlank()) {
                 Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Color(0xFFFFF7ED))
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(WarnBg)
                         .padding(horizontal = 10.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.Top,
                 ) {
                     Text("⚠", fontSize = 13.sp)
-                    Text(warn, color = Color(0xFF9A3412), fontSize = 12.sp, lineHeight = 18.sp, fontWeight = FontWeight.SemiBold)
+                    Text(warn, color = WarnRed, fontSize = 12.sp, lineHeight = 18.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
+        }
+    }
+}
+
+/**
+ * يعرض بندًا واحدًا من قائمة بارامترات (زي "ON = مفعّل" أو "DIP1: وصف").
+ * لو فيه فاصل "=" أو ":" قريب من البداية، بيفصل المفتاح (غامق) عن الوصف —
+ * بدون أي تعديل في النص الأصلي نفسه، مجرد تقسيم بصري للي موجود فعلاً.
+ */
+@Composable
+private fun ParameterRow(segment: String) {
+    val splitIdx = segment.indexOfFirst { it == '=' || it == ':' }
+        .takeIf { it in 1..40 && it < segment.length - 1 }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
+        Box(
+            Modifier.padding(top = 7.dp).size(5.dp).clip(RoundedCornerShape(2.dp)).background(Orange),
+        )
+        if (splitIdx != null) {
+            val key = segment.substring(0, splitIdx + 1).trim()
+            val value = segment.substring(splitIdx + 1).trim()
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                Text(key, color = Navy, fontSize = 13.sp, fontWeight = FontWeight.Bold, lineHeight = 19.sp)
+                if (value.isNotEmpty()) {
+                    Text(value, color = Color(0xFF1E293B), fontSize = 13.sp, lineHeight = 19.sp)
+                }
+            }
+        } else {
+            Text(segment, color = Color(0xFF1E293B), fontSize = 13.sp, lineHeight = 19.sp, modifier = Modifier.weight(1f))
         }
     }
 }
