@@ -118,6 +118,7 @@ import com.hamo.doortech.ui.theme.Orange
 import com.hamo.doortech.ui.theme.OrangeLight
 import com.hamo.doortech.ui.theme.OrangeSoft
 import com.hamo.doortech.ui.theme.Surface
+import com.hamo.doortech.ui.theme.TextPrimary
 import com.hamo.doortech.ui.theme.TextSecondary
 import com.hamo.doortech.util.ltr
 import kotlinx.coroutines.delay
