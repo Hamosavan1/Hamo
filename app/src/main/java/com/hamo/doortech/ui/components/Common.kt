@@ -331,8 +331,13 @@ fun StepCard(index: Int, rawText: String) {
         val segs = main.split("•").map { it.trim() }.filter { it.isNotEmpty() }
         if (segs.size >= 2) segs else null
     }
+    // بعض خطوات البرمجة الحقيقية مثل التهيئة السريعة بتدمج إجراء فرعي مرقّم
+    // جوه الفقرة نفسها، نفس أسلوب الترقيم الموجود في المصدر، فبيتقسّم لخطوات
+    // فرعية مرقّمة بدل نقطة واحدة مزدحمة.
+    val numberedSubSteps = remember(main) { if (bulletItems == null) parseNumberedSubSteps(main) else null }
+    val listSize = bulletItems?.size ?: numberedSubSteps?.second?.size
     var expanded by remember(index, rawText) {
-        mutableStateOf(if (bulletItems != null) bulletItems.size <= 5 else main.length <= 220)
+        mutableStateOf(if (listSize != null) listSize <= 5 else main.length <= 220)
     }
 
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
@@ -358,6 +363,25 @@ fun StepCard(index: Int, rawText: String) {
                             modifier = Modifier.padding(top = 8.dp),
                         )
                     } else if (bulletItems.size > 5) {
+                        Text("عرض أقل ▴", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clickable { expanded = false }.padding(top = 8.dp))
+                    }
+                } else if (numberedSubSteps != null) {
+                    val (intro, items) = numberedSubSteps
+                    val shown = if (expanded) items else items.take(5)
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (intro.isNotEmpty()) {
+                            Text(intro, color = Navy, fontSize = 13.sp, fontWeight = FontWeight.Bold, lineHeight = 19.sp)
+                        }
+                        shown.forEach { (num, body) -> SubStepRow(num, body) }
+                    }
+                    if (!expanded) {
+                        Text(
+                            "+ ${items.size - 5} خطوات فرعية — عرض الكل ▾",
+                            color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    } else if (items.size > 5) {
                         Text("عرض أقل ▴", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
                             modifier = Modifier.clickable { expanded = false }.padding(top = 8.dp))
                     }
@@ -413,6 +437,34 @@ private fun ParameterRow(segment: String) {
         } else {
             Text(segment, color = Color(0xFF1E293B), fontSize = 13.sp, lineHeight = 19.sp, modifier = Modifier.weight(1f))
         }
+    }
+}
+
+private val numberedMarkerRegex = Regex("(?:^|\\s)(\\d{1,2})\\)\\s*")
+
+// بعض نصوص الأدلة الحقيقية مثل التهيئة السريعة لموديلات Nice بتكتب إجراء فرعي
+// مرقّم جوه نفس الجملة. الدالة دي بتكتشف هذا الترقيم، لازم يبدأ بالرقم الأول
+// فعلاً عشان نفرّقه عن أي رقم عرضي بين قوسين زي رقم فقرة في دليل، وتقسمه
+// لمقدّمة وخطوات فرعية بدون تغيير أي كلمة من النص الأصلي.
+private fun parseNumberedSubSteps(text: String): Pair<String, List<Pair<String, String>>>? {
+    val matches = numberedMarkerRegex.findAll(text).toList()
+    if (matches.size < 2 || matches.first().groupValues[1] != "1") return null
+    val intro = text.substring(0, matches.first().range.first).trim().trimEnd(':', '：')
+    val items = matches.mapIndexed { i, m ->
+        val start = m.range.last + 1
+        val end = if (i + 1 < matches.size) matches[i + 1].range.first else text.length
+        m.groupValues[1] to text.substring(start, end).trim()
+    }
+    return intro to items
+}
+
+@Composable
+private fun SubStepRow(num: String, body: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
+        Box(Modifier.size(18.dp).clip(CircleShape).background(OrangeSoft), contentAlignment = Alignment.Center) {
+            Text(num, color = Navy, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+        }
+        Text(body, color = Color(0xFF1E293B), fontSize = 13.sp, lineHeight = 19.sp, modifier = Modifier.weight(1f))
     }
 }
 
