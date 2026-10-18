@@ -18,6 +18,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        // كيستور debug ثابت ومرفوع في المستودع (app/keystore/debug.keystore) — بدون ده، كل
+        // بناء على GitHub Actions كان بيولّد مفتاح توقيع عشوائي جديد لأن كل Runner جهاز جديد،
+        // فكل APK كان يتعارض مع اللي قبله عند التثبيت فوق نسخة متثبتة ("الحزمة تبدو غير صالحة").
+        getByName("debug") {
+            storeFile = file("keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
