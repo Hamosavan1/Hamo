@@ -17,3 +17,5 @@ local.properties
 .idea/
 *.log
 errs.txt
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
