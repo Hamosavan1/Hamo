@@ -152,8 +152,6 @@ fun HamoRoot(container: AppContainer) {
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = com.hamo.doortech.ui.theme.Navy,
                                     selectedTextColor = com.hamo.doortech.ui.theme.Navy,
-                                    unselectedIconColor = com.hamo.doortech.ui.theme.TextSecondary,
-                                    unselectedTextColor = com.hamo.doortech.ui.theme.TextSecondary,
                                     indicatorColor = com.hamo.doortech.ui.theme.OrangeSoft,
                                 ),
                             )

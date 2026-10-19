@@ -1,8 +1,6 @@
 package com.hamo.doortech.ui.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -53,21 +50,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.hamo.doortech.AppContainer
 import com.hamo.doortech.data.db.Verification
 import com.hamo.doortech.ui.UiState
-import com.hamo.doortech.ui.theme.CardBorder
 import com.hamo.doortech.ui.theme.Navy
-import com.hamo.doortech.ui.theme.NavyLight
 import com.hamo.doortech.ui.theme.Orange
 import com.hamo.doortech.ui.theme.OrangeSoft
 import com.hamo.doortech.ui.theme.WarnBg
@@ -252,7 +244,7 @@ fun SectionCard(title: String, modifier: Modifier = Modifier, content: @Composab
         shape = RoundedCornerShape(14.dp),
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+            Text(title, style = MaterialTheme.typography.titleMedium, color = Navy)
             content()
         }
     }
@@ -313,158 +305,6 @@ fun NumberedStep(index: Int, text: String, done: Boolean? = null, onToggle: (() 
             }
         }
         Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-    }
-}
-
-/** بطاقة خطوة فردية لأدلة البرمجة/التوصيلات: تفصل أي تحذير سلامة (مسبوق بعلامة ⚠ في النص
- * المصدري) في صندوق بارز منفصل، وتطوي النص الطويل جدًا مع زر "عرض المزيد" بدل كتلة نصية
- * واحدة ضخمة يصعب قراءتها. مُستخدمة في بطاقة الدليل المصغّرة وفي صفحة الدليل الكاملة معًا. */
-@Composable
-fun StepCard(index: Int, rawText: String) {
-    val parts = rawText.split("⚠", limit = 2)
-    val main = parts[0].trim()
-    val warn = parts.getOrNull(1)?.trim()
-    // النصوص الحقيقية من الكتالوجات بتستخدم "•" كفاصل حقيقي بين بارامترات/مواصفات
-    // (موجود أصلاً في بيانات المصدر) — لو فيه أكتر من فاصل، نعرضها كقائمة واضحة
-    // بدل فقرة مزدحمة، بدل ما نفبرك أي حقول مش موجودة في البيانات.
-    val bulletItems = remember(main) {
-        val segs = main.split("•").map { it.trim() }.filter { it.isNotEmpty() }
-        if (segs.size >= 2) segs else null
-    }
-    // بعض خطوات البرمجة الحقيقية مثل التهيئة السريعة بتدمج إجراء فرعي مرقّم
-    // جوه الفقرة نفسها، نفس أسلوب الترقيم الموجود في المصدر، فبيتقسّم لخطوات
-    // فرعية مرقّمة بدل نقطة واحدة مزدحمة.
-    val numberedSubSteps = remember(main) { if (bulletItems == null) parseNumberedSubSteps(main) else null }
-    val listSize = bulletItems?.size ?: numberedSubSteps?.second?.size
-    var expanded by remember(index, rawText) {
-        mutableStateOf(if (listSize != null) listSize <= 5 else main.length <= 220)
-    }
-
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
-        Box(Modifier.size(30.dp).clip(CircleShape).background(Navy), contentAlignment = Alignment.Center) {
-            Text("$index", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        }
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFFF7F8FA))
-                    .border(1.dp, CardBorder, RoundedCornerShape(12.dp))
-                    .then(if (!expanded) Modifier.clickable { expanded = true } else Modifier)
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
-            ) {
-                if (bulletItems != null) {
-                    val shown = if (expanded) bulletItems else bulletItems.take(5)
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        shown.forEach { seg -> ParameterRow(seg) }
-                    }
-                    if (!expanded) {
-                        Text(
-                            "+ ${bulletItems.size - 5} بنود أخرى — عرض الكل ▾",
-                            color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
-                    } else if (bulletItems.size > 5) {
-                        Text("عرض أقل ▴", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                            modifier = Modifier.clickable { expanded = false }.padding(top = 8.dp))
-                    }
-                } else if (numberedSubSteps != null) {
-                    val (intro, items) = numberedSubSteps
-                    val shown = if (expanded) items else items.take(5)
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (intro.isNotEmpty()) {
-                            Text(intro, color = Navy, fontSize = 13.sp, fontWeight = FontWeight.Bold, lineHeight = 19.sp)
-                        }
-                        shown.forEach { (num, body) -> SubStepRow(num, body) }
-                    }
-                    if (!expanded) {
-                        Text(
-                            "+ ${items.size - 5} خطوات فرعية — عرض الكل ▾",
-                            color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
-                    } else if (items.size > 5) {
-                        Text("عرض أقل ▴", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                            modifier = Modifier.clickable { expanded = false }.padding(top = 8.dp))
-                    }
-                } else {
-                    Text(
-                        main, color = Color(0xFF1E293B), fontSize = 14.sp, lineHeight = 23.sp,
-                        maxLines = if (expanded) Int.MAX_VALUE else 4, overflow = TextOverflow.Ellipsis,
-                    )
-                    if (!expanded) {
-                        Text("عرض المزيد ▾", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 4.dp))
-                    } else if (main.length > 220) {
-                        Text("عرض أقل ▴", color = NavyLight, fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                            modifier = Modifier.clickable { expanded = false }.padding(top = 4.dp))
-                    }
-                }
-            }
-            if (!warn.isNullOrBlank()) {
-                Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(WarnBg)
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.Top,
-                ) {
-                    Text("⚠", fontSize = 13.sp)
-                    Text(warn, color = WarnRed, fontSize = 12.sp, lineHeight = 18.sp, fontWeight = FontWeight.SemiBold)
-                }
-            }
-        }
-    }
-}
-
-/**
- * يعرض بندًا واحدًا من قائمة بارامترات (زي "ON = مفعّل" أو "DIP1: وصف").
- * لو فيه فاصل "=" أو ":" قريب من البداية، بيفصل المفتاح (غامق) عن الوصف —
- * بدون أي تعديل في النص الأصلي نفسه، مجرد تقسيم بصري للي موجود فعلاً.
- */
-@Composable
-private fun ParameterRow(segment: String) {
-    val splitIdx = segment.indexOfFirst { it == '=' || it == ':' }
-        .takeIf { it in 1..40 && it < segment.length - 1 }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
-        Box(
-            Modifier.padding(top = 7.dp).size(5.dp).clip(RoundedCornerShape(2.dp)).background(Orange),
-        )
-        if (splitIdx != null) {
-            val key = segment.substring(0, splitIdx + 1).trim()
-            val value = segment.substring(splitIdx + 1).trim()
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                Text(key, color = Navy, fontSize = 13.sp, fontWeight = FontWeight.Bold, lineHeight = 19.sp)
-                if (value.isNotEmpty()) {
-                    Text(value, color = Color(0xFF1E293B), fontSize = 13.sp, lineHeight = 19.sp)
-                }
-            }
-        } else {
-            Text(segment, color = Color(0xFF1E293B), fontSize = 13.sp, lineHeight = 19.sp, modifier = Modifier.weight(1f))
-        }
-    }
-}
-
-private val numberedMarkerRegex = Regex("(?:^|\\s)(\\d{1,2})\\)\\s*")
-
-// بعض نصوص الأدلة الحقيقية مثل التهيئة السريعة لموديلات Nice بتكتب إجراء فرعي
-// مرقّم جوه نفس الجملة. الدالة دي بتكتشف هذا الترقيم، لازم يبدأ بالرقم الأول
-// فعلاً عشان نفرّقه عن أي رقم عرضي بين قوسين زي رقم فقرة في دليل، وتقسمه
-// لمقدّمة وخطوات فرعية بدون تغيير أي كلمة من النص الأصلي.
-private fun parseNumberedSubSteps(text: String): Pair<String, List<Pair<String, String>>>? {
-    val matches = numberedMarkerRegex.findAll(text).toList()
-    if (matches.size < 2 || matches.first().groupValues[1] != "1") return null
-    val intro = text.substring(0, matches.first().range.first).trim().trimEnd(':', '：')
-    val items = matches.mapIndexed { i, m ->
-        val start = m.range.last + 1
-        val end = if (i + 1 < matches.size) matches[i + 1].range.first else text.length
-        m.groupValues[1] to text.substring(start, end).trim()
-    }
-    return intro to items
-}
-
-@Composable
-private fun SubStepRow(num: String, body: String) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
-        Box(Modifier.size(18.dp).clip(CircleShape).background(OrangeSoft), contentAlignment = Alignment.Center) {
-            Text(num, color = Navy, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-        }
-        Text(body, color = Color(0xFF1E293B), fontSize = 13.sp, lineHeight = 19.sp, modifier = Modifier.weight(1f))
     }
 }
 
