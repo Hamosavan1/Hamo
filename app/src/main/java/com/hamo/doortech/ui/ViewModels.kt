@@ -452,14 +452,15 @@ class PartsViewModel(private val repo: AppRepository) : ViewModel() {
 data class FavItem(val type: String, val id: Long, val title: String, val subtitle: String)
 
 class FavoritesViewModel(private val repo: AppRepository) : ViewModel() {
-    val items: StateFlow<UiState<List<FavItem>>> = combine(repo.favorites, repo.faults, repo.models, repo.guides) { favs, faults, models, guides ->
+    val items: StateFlow<UiState<List<FavItem>>> = combine(repo.favorites, repo.faults, repo.models, repo.guides, repo.brands) { favs, faults, models, guides, brands ->
+        val bm = brands.associate { it.id to it.name }
         val fm = faults.associateBy { it.id }
         val mm = models.associateBy { it.id }
         val gm = guides.associateBy { it.id }
         favs.mapNotNull { f ->
             when (f.targetType) {
                 OwnerType.FAULT -> fm[f.targetId]?.let { FavItem(f.targetType, it.id, it.title, "عطل") }
-                OwnerType.MODEL -> mm[f.targetId]?.let { FavItem(f.targetType, it.id, it.name, "موديل") }
+                OwnerType.MODEL -> mm[f.targetId]?.let { FavItem(f.targetType, it.id, it.name, bm[it.brandId] ?: "موديل") }
                 OwnerType.GUIDE -> gm[f.targetId]?.let { FavItem(f.targetType, it.id, it.title, "دليل") }
                 else -> null
             }
@@ -611,4 +612,11 @@ class HomeViewModelStats(repo: AppRepository) {
     ) { c, b, m, f, g -> mapOf("التصنيفات" to c.size, "الشركات" to b.size, "الموديلات" to m.size, "الأعطال" to f.size, "الأدلة" to g.size) }
         .combine(repo.jobs) { base, jobs -> base + ("زيارات الصيانة" to jobs.size) }
         .combine(repo.parts) { base, parts -> base + ("قطع الغيار" to parts.size) }
+}
+
+// ======================= قائمة الأعطال =======================
+
+class FaultListViewModel(repo: AppRepository) : ViewModel() {
+    val faults = repo.faults.asUiState(viewModelScope)
+    val names = repo.nameMaps().asUiState(viewModelScope)
 }

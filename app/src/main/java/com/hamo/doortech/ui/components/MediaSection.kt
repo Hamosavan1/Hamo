@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -116,7 +117,8 @@ private fun openFile(context: Context, container: com.hamo.doortech.AppContainer
  * في زيارات الصيانة تُصنَّف الصور «قبل/بعد».
  */
 @Composable
-fun MediaSection(ownerType: String, ownerId: Long, modifier: Modifier = Modifier) {
+/** readOnly: عرض فقط (للأدلة داخل صفحات البرمجة/التوصيلات) — بدون أزرار إضافة أو حذف، والصور بعرض كامل. */
+fun MediaSection(ownerType: String, ownerId: Long, modifier: Modifier = Modifier, readOnly: Boolean = false) {
     val container = LocalContainer.current
     val messenger = LocalMessenger.current
     val context = LocalContext.current
@@ -168,7 +170,30 @@ fun MediaSection(ownerType: String, ownerId: Long, modifier: Modifier = Modifier
         picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
-    SectionCard("الصور والمرفقات", modifier) {
+    if (readOnly) {
+        val list = (state as? com.hamo.doortech.ui.UiState.Success)?.value.orEmpty()
+        if (list.isNotEmpty()) Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            list.filter { it.kind == MediaKind.IMAGE }.forEach { m ->
+                Column(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White).clickable { viewing = m }.padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Thumbnail(container.mediaStore.fileFor(m.path), Modifier.fillMaxWidth().height(230.dp).clip(RoundedCornerShape(12.dp)))
+                    if (m.title.isNotBlank()) Text(m.title, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            list.filter { it.kind != MediaKind.IMAGE }.forEach { m ->
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color.White)
+                        .clickable { openFile(context, container, m) { messenger.show(it) } }.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Icon(if (m.kind == MediaKind.LINK) Icons.Default.Link else Icons.Default.AttachFile, null, tint = MaterialTheme.colorScheme.primary)
+                    Text(m.title.ifBlank { m.path }, Modifier.weight(1f), maxLines = 1)
+                }
+            }
+        }
+    } else SectionCard("الصور والمرفقات", modifier) {
         val isJob = ownerType == OwnerType.JOB
         if (isJob) {
             Text("قبل الإصلاح", style = MaterialTheme.typography.labelLarge)

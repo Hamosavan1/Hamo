@@ -39,7 +39,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import com.hamo.doortech.AppContainer
 import com.hamo.doortech.data.db.Verification
 import com.hamo.doortech.ui.UiState
+import com.hamo.doortech.ui.theme.DeepNavy
 import com.hamo.doortech.ui.theme.Navy
 import com.hamo.doortech.ui.theme.Orange
 import com.hamo.doortech.ui.theme.OrangeSoft
@@ -86,10 +87,18 @@ val LocalMessenger = staticCompositionLocalOf<Messenger> { error("Messenger غي
 fun HamoTopBar(
     title: String,
     onBack: (() -> Unit)? = null,
+    subtitle: String? = null,
     actions: @Composable () -> Unit = {},
 ) {
-    TopAppBar(
-        title = { Text(title, maxLines = 1, fontWeight = FontWeight.Bold) },
+    CenterAlignedTopAppBar(
+        title = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(title, maxLines = 1, fontWeight = FontWeight.Bold)
+                if (!subtitle.isNullOrBlank()) {
+                    Text(subtitle, maxLines = 1, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.85f))
+                }
+            }
+        },
         navigationIcon = {
             if (onBack != null) {
                 IconButton(onClick = onBack) {
@@ -98,8 +107,8 @@ fun HamoTopBar(
             }
         },
         actions = { actions() },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Navy,
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = DeepNavy,
             titleContentColor = Color.White,
             navigationIconContentColor = Color.White,
             actionIconContentColor = Color.White,

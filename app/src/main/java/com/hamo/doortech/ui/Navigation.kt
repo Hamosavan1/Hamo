@@ -3,7 +3,7 @@ package com.hamo.doortech.ui
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Search
@@ -22,7 +22,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.hamo.doortech.ui.theme.DeepNavy
+import com.hamo.doortech.ui.theme.Orange
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -46,6 +49,8 @@ import com.hamo.doortech.ui.screens.FaultDetailScreen
 import com.hamo.doortech.ui.screens.FaultEditScreen
 import com.hamo.doortech.ui.screens.FaultStepsScreen
 import com.hamo.doortech.ui.screens.FavoritesScreen
+import com.hamo.doortech.ui.screens.FaultsListScreen
+import com.hamo.doortech.ui.screens.ModelGuidesScreen
 import com.hamo.doortech.ui.screens.GuideDetailScreen
 import com.hamo.doortech.ui.screens.GuideEditScreen
 import com.hamo.doortech.ui.screens.GuidesScreen
@@ -90,6 +95,8 @@ object Routes {
     const val GUIDE_EDIT = "guide_edit/{id}?type={type}"
     const val JOB = "job/{id}"
     const val JOB_EDIT = "job_edit/{id}"
+    const val FAULTS = "faults"
+    const val MODEL_GUIDES = "model_guides/{id}?tab={tab}"
 
     fun brands(cat: Long = 0) = "brands?cat=$cat"
     fun modelsFor(brand: Long = 0, cat: Long = 0) = "models?brand=$brand&cat=$cat"
@@ -104,13 +111,15 @@ object Routes {
     fun guideEdit(id: Long, type: String = "INSTALL") = "guide_edit/$id?type=$type"
     fun job(id: Long) = "job/$id"
     fun jobEdit(id: Long) = "job_edit/$id"
+    fun modelGuides(id: Long, tab: String = "PROGRAMMING") = "model_guides/$id?tab=$tab"
 }
 
-private data class TopItem(val route: String, val label: String, val icon: ImageVector)
+/** route: نمط المسار كما يسجله NavHost، target: المسار الفعلي عند الضغط. */
+private data class TopItem(val route: String, val label: String, val icon: ImageVector, val target: String = route)
 
 private val topItems = listOf(
     TopItem(Routes.HOME, "الرئيسية", Icons.Default.Home),
-    TopItem(Routes.FAVORITES, "المفضلة", Icons.Default.FavoriteBorder),
+    TopItem(Routes.BRANDS, "الماركات", Icons.Default.Business, Routes.brands(0)),
     TopItem(Routes.SEARCH, "بحث", Icons.Default.Search),
     TopItem(Routes.MORE, "المزيد", Icons.Default.MoreHoriz),
 )
@@ -136,12 +145,12 @@ fun HamoRoot(container: AppContainer) {
             snackbarHost = { SnackbarHost(snack) },
             bottomBar = {
                 if (topItems.any { it.route == route }) {
-                    NavigationBar(containerColor = androidx.compose.ui.graphics.Color.White) {
+                    NavigationBar(containerColor = DeepNavy) {
                         topItems.forEach { item ->
                             NavigationBarItem(
                                 selected = route == item.route,
                                 onClick = {
-                                    nav.navigate(item.route) {
+                                    nav.navigate(item.target) {
                                         popUpTo(nav.graph.findStartDestination().id) { saveState = true }
                                         launchSingleTop = true
                                         restoreState = true
@@ -150,9 +159,11 @@ fun HamoRoot(container: AppContainer) {
                                 icon = { Icon(item.icon, null) },
                                 label = { Text(item.label) },
                                 colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = com.hamo.doortech.ui.theme.Navy,
-                                    selectedTextColor = com.hamo.doortech.ui.theme.Navy,
-                                    indicatorColor = com.hamo.doortech.ui.theme.OrangeSoft,
+                                    selectedIconColor = Orange,
+                                    selectedTextColor = Orange,
+                                    unselectedIconColor = Color(0xFFB8C2D6),
+                                    unselectedTextColor = Color(0xFFB8C2D6),
+                                    indicatorColor = Color.White.copy(alpha = 0.08f),
                                 ),
                             )
                         }
@@ -221,6 +232,14 @@ fun HamoRoot(container: AppContainer) {
                     ),
                 ) { GuideEditScreen(nav, it.arguments?.getLong("id") ?: 0L, it.arguments?.getString("type") ?: "INSTALL") }
                 composable(Routes.JOB, idArg) { JobDetailScreen(nav, it.arguments?.getLong("id") ?: 0L) }
+                composable(Routes.FAULTS) { FaultsListScreen(nav) }
+                composable(
+                    Routes.MODEL_GUIDES,
+                    listOf(
+                        navArgument("id") { type = NavType.LongType },
+                        navArgument("tab") { type = NavType.StringType; defaultValue = "PROGRAMMING" },
+                    ),
+                ) { ModelGuidesScreen(nav, it.arguments?.getLong("id") ?: 0L, it.arguments?.getString("tab") ?: "PROGRAMMING") }
                 composable(Routes.JOB_EDIT, idArg) { JobEditScreen(nav, it.arguments?.getLong("id") ?: 0L) }
             }
         }

@@ -141,7 +141,7 @@ private fun StepItem(index: Int, text: String, isDone: Boolean, accent: Color, o
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 val muted = if (isDone) TextDecoration.LineThrough else null
                 if (head != null) {
-                    Text(if (head.any { it in '\u0600'..'\u06FF' }) head else head.ltr(), color = if (isDone) MutedText else Navy, fontWeight = FontWeight.Bold, fontSize = 16.sp, lineHeight = 24.sp, textDecoration = muted)
+                    Text(if (head.any { it in '\u0600'..'\u06FF' }) head else head.ltr(), color = if (isDone) MutedText else accent, fontWeight = FontWeight.Bold, fontSize = 16.sp, lineHeight = 24.sp, textDecoration = muted)
                 }
                 if (isDone) {
                     // بعد التنفيذ نختصر الخطوة لسطر واحد حتى يركّز الفني على اللي باقي.

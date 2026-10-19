@@ -18,15 +18,20 @@ import androidx.compose.ui.unit.sp
 
 val Navy = Color(0xFF14254A)
 val NavyLight = Color(0xFF2B4C8C)
-val Orange = Color(0xFFF97316)
+val Orange = Color(0xFFF7931E)
+/** الكحلي الغامق للشريط العلوي والسفلي وشاشة البداية. */
+val DeepNavy = Color(0xFF0A1A3A)
+/** الأزرق الأساسي للأزرار وأرقام الخطوات والتبويب المختار. */
+val BrandBlue = Color(0xFF1D4ED8)
+val BrandBlueSoft = Color(0xFFE8EEFC)
 val OrangeSoft = Color(0xFFFFEDD5)
-val Surface = Color(0xFFF3F6FB)
+val Surface = Color(0xFFF2F4F8)
 val OkGreen = Color(0xFF16A34A)
 val WarnRed = Color(0xFFB91C1C)
 val WarnBg = Color(0xFFFEF2F2)
 
 // ألوان مميزة لكل قسم: البرمجة أزرق، التوصيلات كهرماني، الريموت بنفسجي، التركيب أخضر مزرق.
-val ProgBlue = Color(0xFF2563EB)
+val ProgBlue = Color(0xFF1D4ED8)
 val ProgSoft = Color(0xFFDBEAFE)
 val WireAmber = Color(0xFFD97706)
 val WireSoft = Color(0xFFFEF3C7)

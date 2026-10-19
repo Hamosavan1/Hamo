@@ -3,6 +3,28 @@ package com.hamo.doortech.ui.screens
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.Engineering
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.hamo.doortech.ui.components.HamoMark
+import com.hamo.doortech.ui.theme.DeepNavy
+import com.hamo.doortech.ui.theme.MutedText
+import com.hamo.doortech.ui.theme.Navy
+import com.hamo.doortech.ui.theme.Orange
+import com.hamo.doortech.util.ltr
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -221,19 +243,30 @@ fun FavoritesScreen(nav: NavController) {
             StateContent(state, "لا توجد عناصر مفضلة", "اضغط على النجمة داخل أي عطل أو دليل أو موديل لإضافته هنا.", isEmpty = { it.isEmpty() }) { list ->
                 LazyColumn(contentPadding = PaddingValues(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     items(list, key = { "${it.type}_${it.id}" }) { f ->
-                        ListCard(
-                            title = f.title, subtitle = f.subtitle,
-                            trailing = { IconButton(onClick = { vm.remove(f) }) { Icon(Icons.Default.Favorite, "إزالة من المفضلة", tint = androidx.compose.ui.graphics.Color(0xFFDC2626)) } },
-                            onClick = {
-                                nav.navigate(
-                                    when (f.type) {
-                                        OwnerType.FAULT -> Routes.fault(f.id)
-                                        OwnerType.MODEL -> Routes.model(f.id)
-                                        else -> Routes.guide(f.id)
-                                    }
-                                )
-                            },
-                        )
+                        Row(
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White)
+                                .border(1.dp, Color(0xFFE3E8F0), RoundedCornerShape(16.dp))
+                                .clickable {
+                                    nav.navigate(
+                                        when (f.type) {
+                                            OwnerType.FAULT -> Routes.fault(f.id)
+                                            OwnerType.MODEL -> Routes.model(f.id)
+                                            else -> Routes.guide(f.id)
+                                        }
+                                    )
+                                }.padding(10.dp),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            if (f.type == OwnerType.MODEL) MachineIcon(f.subtitle, f.title, size = 76.dp)
+                            else Box(Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFEEF2F7)), contentAlignment = Alignment.Center) {
+                                Icon(if (f.type == OwnerType.FAULT) Icons.Default.WarningAmber else Icons.Default.Tune, null, tint = Navy)
+                            }
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(f.title.ltr(), color = Navy, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                Text(f.subtitle.ltr(), color = MutedText, fontSize = 12.sp)
+                            }
+                            IconButton(onClick = { vm.remove(f) }) { Icon(Icons.Default.Favorite, "إزالة من المفضلة", tint = Orange) }
+                        }
                     }
                 }
             }
@@ -362,8 +395,37 @@ fun SettingsScreen(nav: NavController) {
     var confirmDeleteSeed by remember { mutableStateOf(false) }
     var confirmReload by remember { mutableStateOf(false) }
 
-    Scaffold(topBar = { HamoTopBar("الإعدادات والمساعدة", onBack = { nav.popBackStack() }) }) { pad ->
+    Scaffold(topBar = { HamoTopBar("الإعدادات", onBack = { nav.popBackStack() }) }) { pad ->
         ScrollColumn(pad) {
+            Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color.White)
+                    .border(1.dp, Color(0xFFE3E8F0), RoundedCornerShape(18.dp)).padding(vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(Modifier.size(84.dp).clip(CircleShape).background(DeepNavy), contentAlignment = Alignment.Center) { HamoMark(60.dp) }
+                Spacer(Modifier.height(8.dp))
+                Text("HAMO DOOR TECH", color = Navy, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                Text("إصدار التطبيق 1.0.0", color = MutedText, fontSize = 13.sp)
+                Spacer(Modifier.height(10.dp))
+                SettingRow(Icons.Default.Language, "اللغة", "العربية") {}
+                SettingRow(Icons.Default.Backup, "النسخ الاحتياطي والاستعادة", "") { nav.navigate(Routes.BACKUP) }
+                SettingRow(Icons.Default.PhotoLibrary, "الصور والمرفقات", "") { nav.navigate(Routes.MEDIA) }
+                SettingRow(Icons.Default.AdminPanelSettings, "لوحة الإدارة", "") { nav.navigate(Routes.ADMIN) }
+                SettingRow(Icons.Default.Info, "حول التطبيق", "يعمل بدون إنترنت") {}
+            }
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color(0xFFE8EEFC)).padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Box(Modifier.size(52.dp).clip(CircleShape).background(DeepNavy), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Engineering, null, tint = Color.White, modifier = Modifier.size(30.dp))
+                }
+                Column(Modifier.weight(1f)) {
+                    Text("تم التطوير بواسطة", color = MutedText, fontSize = 12.sp)
+                    Text("م/ محمد رشاد محمد سليم", color = Navy, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                    Text("فني في صيانة الأبواب الأوتوماتيكية", color = MutedText, fontSize = 12.sp)
+                }
+            }
             SectionCard("عن التطبيق") {
                 Text("HAMO DOOR TECH — الإصدار 1.0.0")
                 Text("دليل فني لصيانة الأبواب والبوابات الأوتوماتيك. يعمل بالكامل دون إنترنت، وبياناتك محفوظة على جهازك فقط.", style = MaterialTheme.typography.bodyMedium)
@@ -396,5 +458,18 @@ fun SettingsScreen(nav: NavController) {
         ConfirmDialog("إعادة تحميل البيانات التجريبية", "ستُضاف البيانات التجريبية مرة أخرى. إن كانت موجودة سيظهر بعضها مكررًا.", "إضافة", false,
             onConfirm = { confirmReload = false; vm.reloadSeed { messenger.show(it.messageOr("تمت إضافة البيانات التجريبية")) } },
             onDismiss = { confirmReload = false })
+    }
+}
+
+@Composable
+private fun SettingRow(icon: ImageVector, label: String, value: String, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 13.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(icon, null, tint = Navy, modifier = Modifier.size(22.dp))
+        Text(label, Modifier.weight(1f), color = Navy, fontSize = 15.sp)
+        if (value.isNotBlank()) Text(value, color = MutedText, fontSize = 13.sp)
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null, tint = Color(0xFF94A3B8))
     }
 }
