@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +36,7 @@ import androidx.compose.material.icons.filled.DoorSliding
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Garage
 import androidx.compose.material.icons.filled.Handyman
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhotoLibrary
@@ -55,8 +58,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScrollableTabRow
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -106,7 +107,21 @@ import com.hamo.doortech.ui.components.VerificationBadge
 import com.hamo.doortech.ui.components.WarningBox
 import com.hamo.doortech.ui.components.goTop
 import com.hamo.doortech.ui.components.hamoVm
+import com.hamo.doortech.ui.components.GuideIcon
+import com.hamo.doortech.ui.components.GuideStyle
+import com.hamo.doortech.ui.components.BeforeYouStart
+import com.hamo.doortech.ui.components.StepsChecklist
+import com.hamo.doortech.ui.components.TermsCard
+import com.hamo.doortech.ui.components.guideStyle
+import com.hamo.doortech.ui.theme.FaultRose
+import com.hamo.doortech.ui.theme.FaultSoft
+import com.hamo.doortech.ui.theme.InstallTeal
+import com.hamo.doortech.ui.theme.MutedText
 import com.hamo.doortech.ui.theme.Navy
+import com.hamo.doortech.ui.theme.OrangeSoft
+import com.hamo.doortech.ui.theme.ProgBlue
+import com.hamo.doortech.ui.theme.RemoteViolet
+import com.hamo.doortech.ui.theme.WireAmber
 import com.hamo.doortech.ui.theme.NavyLight
 import com.hamo.doortech.ui.theme.Orange
 import com.hamo.doortech.util.ltr
@@ -179,87 +194,131 @@ fun HomeScreen(nav: NavController) {
     val stats by home.stats.collectAsStateWithLifecycle()
     val catList = (cats as? UiState.Success)?.value ?: emptyList()
 
-    Box(Modifier.fillMaxSize().background(BgGradient)) {
+    Column(
+        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+    ) {
+        // الرأس: الشعار + ترحيب + البحث
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
+                .background(Brush.linearGradient(listOf(DeepNavy, NavyLight))).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.size(40.dp).background(PanelNavy, CircleShape), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Build, null, tint = Orange, modifier = Modifier.size(22.dp))
+                Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Orange), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Build, null, tint = Color.White, modifier = Modifier.size(24.dp))
                 }
-                Column {
-                    Text("HAMO", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                    Text("DOOR TECH", color = Orange, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Column(Modifier.weight(1f)) {
+                    Text("HAMO DOOR TECH", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                    Text("مكتبتك الفنية في جيبك", color = SoftText, fontSize = 13.sp)
                 }
             }
-            // شريط البحث
+            Text("عايز تعمل إيه النهارده؟", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
             Row(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color.White)
-                    .clickable { nav.goTop(Routes.SEARCH) }.padding(horizontal = 14.dp, vertical = 14.dp),
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White)
+                    .clickable { nav.goTop(Routes.SEARCH) }.padding(horizontal = 14.dp, vertical = 15.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Icon(Icons.Default.Search, null, tint = Color(0xFF64748B))
-                Text("ابحث عن موديل أو شركة أو عطل...", color = Color(0xFF64748B))
+                Icon(Icons.Default.Search, null, tint = MutedText)
+                Text("ابحث عن موديل أو شركة أو عطل...", color = MutedText)
             }
-            // الأقسام الثلاثة
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        }
+
+        Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+            // الأقسام الأساسية: كروت كبيرة ملونة
+            SectionTitle("الأقسام الأساسية")
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                BigTile(guideStyle(GuideType.PROGRAMMING), Modifier.weight(1f)) { nav.navigate(Routes.guides(GuideType.PROGRAMMING)) }
+                BigTile(guideStyle(GuideType.WIRING), Modifier.weight(1f)) { nav.navigate(Routes.guides(GuideType.WIRING)) }
+            }
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                BigTile(guideStyle(GuideType.REMOTE), Modifier.weight(1f)) { nav.navigate(Routes.guides(GuideType.REMOTE)) }
+                BigTile(
+                    GuideStyle(FaultRose, FaultSoft, Icons.Default.MedicalServices, "تشخيص الأعطال", "اكتب العَرَض واعرف السبب والحل"),
+                    Modifier.weight(1f),
+                ) { nav.navigate(Routes.DIAGNOSE) }
+            }
+
+            // نوع البوابة
+            SectionTitle("اختار نوع البوابة")
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 catTiles.forEach { t ->
                     Column(
-                        Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(PanelNavy)
+                        Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(18.dp)).background(Color.White)
                             .clickable { nav.navigate(Routes.brands(catList.idFor(t.key))) }
                             .padding(vertical = 16.dp, horizontal = 6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Icon(t.icon, null, tint = Color.White, modifier = Modifier.size(38.dp))
-                        Text(t.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp, textAlign = TextAlign.Center)
+                        Box(Modifier.size(52.dp).clip(CircleShape).background(OrangeSoft), contentAlignment = Alignment.Center) {
+                            Icon(t.icon, null, tint = Orange, modifier = Modifier.size(30.dp))
+                        }
+                        Text(t.title, color = Navy, fontWeight = FontWeight.Bold, fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 18.sp)
                     }
                 }
             }
+
             val s = (stats as? UiState.Success)?.value
             if (s != null) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    HomeStat("الموديلات", s.models, Modifier.weight(1f))
-                    HomeStat("الأدلة", s.guides, Modifier.weight(1f))
-                    HomeStat("الأعطال", s.faults, Modifier.weight(1f))
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color.White).padding(vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ) {
+                    HomeStat("موديل", s.models)
+                    HomeStat("دليل", s.guides)
+                    HomeStat("عطل", s.faults)
                 }
             }
-            Text("أقسام أخرى", color = Orange, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+
+            SectionTitle("أدوات تانية")
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OtherTile("تشخيص الأعطال", Icons.Default.MedicalServices, Modifier.weight(1f)) { nav.navigate(Routes.DIAGNOSE) }
                 OtherTile("الشركات", Icons.Default.Business, Modifier.weight(1f)) { nav.navigate(Routes.brands(0)) }
+                OtherTile("التركيب", Icons.Default.Construction, Modifier.weight(1f)) { nav.navigate(Routes.guides(GuideType.INSTALL)) }
                 OtherTile("قطع الغيار", Icons.Default.Handyman, Modifier.weight(1f)) { nav.navigate(Routes.PARTS) }
-                OtherTile("الصيانة", Icons.Default.Construction, Modifier.weight(1f)) { nav.navigate(Routes.JOBS) }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OtherTile("أدلة البرمجة", Icons.Default.Settings, Modifier.weight(1f)) { nav.navigate(Routes.guides(GuideType.PROGRAMMING)) }
-                OtherTile("التوصيلات", Icons.Default.Memory, Modifier.weight(1f)) { nav.navigate(Routes.guides(GuideType.WIRING)) }
+                OtherTile("الصيانة", Icons.Default.Build, Modifier.weight(1f)) { nav.navigate(Routes.JOBS) }
                 OtherTile("بحث بالإنترنت", Icons.Default.Search, Modifier.weight(1f)) { nav.navigate(Routes.ai()) }
                 OtherTile("لوحة الإدارة", Icons.Default.Category, Modifier.weight(1f)) { nav.navigate(Routes.ADMIN) }
             }
+            Spacer(Modifier.height(8.dp))
         }
     }
 }
 
 @Composable
-private fun HomeStat(label: String, value: Int, modifier: Modifier) {
+private fun SectionTitle(text: String) {
+    Text(text, color = Navy, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+}
+
+/** كارت قسم كبير: أيقونة ملونة + اسم + جملة بسيطة تشرح القسم. */
+@Composable
+private fun BigTile(style: GuideStyle, modifier: Modifier, onClick: () -> Unit) {
     Column(
-        modifier.clip(RoundedCornerShape(12.dp)).background(Color(0x22FFFFFF)).padding(vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier.fillMaxHeight().clip(RoundedCornerShape(20.dp)).background(Color.White).clickable(onClick = onClick).padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text("$value", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-        Text(label, color = SoftText, fontSize = 12.sp)
+        GuideIcon(style, size = 46)
+        Text(style.title, color = Navy, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+        Text(style.hint, color = MutedText, fontSize = 12.sp, lineHeight = 17.sp, maxLines = 2)
+    }
+}
+
+@Composable
+private fun HomeStat(label: String, value: Int) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("$value", color = Navy, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
+        Text(label, color = MutedText, fontSize = 12.sp)
     }
 }
 
 @Composable
 private fun OtherTile(label: String, icon: ImageVector, modifier: Modifier, onClick: () -> Unit) {
     Column(
-        modifier.clip(RoundedCornerShape(14.dp)).background(Color.White).clickable(onClick = onClick).padding(vertical = 12.dp, horizontal = 4.dp),
+        modifier.clip(RoundedCornerShape(16.dp)).background(Color.White).clickable(onClick = onClick).padding(vertical = 14.dp, horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Icon(icon, null, tint = Navy, modifier = Modifier.size(26.dp))
-        Text(label, color = Navy, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center, maxLines = 2)
+        Icon(icon, null, tint = NavyLight, modifier = Modifier.size(26.dp))
+        Text(label, color = Navy, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center, maxLines = 2)
     }
 }
 
@@ -281,7 +340,7 @@ fun BrandsListScreen(nav: NavController, catId: Long) {
     val catName = (cats as? UiState.Success)?.value?.firstOrNull { it.id == catId }?.name
 
     Scaffold(topBar = { HamoTopBar(catName ?: "الشركات المصنعة", onBack = { nav.popBackStack() }) }) { pad ->
-        Column(Modifier.padding(pad).fillMaxSize().background(Color(0xFFF4F7FB))) {
+        Column(Modifier.padding(pad).fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             SearchBox(text, { text = it }, "ابحث عن شركة...")
             StateContent(brands, "لا توجد شركات", "أضف شركات من لوحة الإدارة.", isEmpty = { it.isEmpty() }) { all ->
                 val ms = (models as? UiState.Success)?.value ?: emptyList()
@@ -352,7 +411,7 @@ fun ModelsScreen(nav: NavController, brandId: Long, catId: Long) {
             ExtendedFloatingActionButton(onClick = { nav.navigate(Routes.modelEdit(0, brandId)) }, icon = { Icon(Icons.Default.Add, null) }, text = { Text("موديل جديد") })
         },
     ) { pad ->
-        Column(Modifier.padding(pad).fillMaxSize().background(Color(0xFFF4F7FB))) {
+        Column(Modifier.padding(pad).fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             SearchBox(text, { text = it }, "ابحث عن موديل...")
             val catList = (cats as? UiState.Success)?.value ?: emptyList()
             Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -400,12 +459,13 @@ fun ModelsScreen(nav: NavController, brandId: Long, catId: Long) {
 // ======================= تفاصيل المكينة بالتبويبات =======================
 
 @Composable
-private fun GuideBlock(nav: NavController, g: TechnicalGuide) {
+private fun GuideBlock(nav: NavController, g: TechnicalGuide, startOpen: Boolean) {
     val container = LocalContainer.current
     val vm = hamoVm(key = "block_${g.id}") { GuideDetailViewModel(container.repo, g.id) }
     val state by vm.detail.collectAsStateWithLifecycle()
-    val steps = (state as? UiState.Success)?.value?.full?.orderedSteps ?: emptyList()
-    var expanded by remember(g.id) { mutableStateOf(true) }
+    val steps = (state as? UiState.Success)?.value?.full?.orderedSteps?.map { it.text } ?: emptyList()
+    var expanded by remember(g.id) { mutableStateOf(startOpen) }
+    val style = guideStyle(g.type)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -415,77 +475,42 @@ private fun GuideBlock(nav: NavController, g: TechnicalGuide) {
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Color(0xFFFFEDD5)),
-                    contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Construction, contentDescription = null, tint = Orange, modifier = Modifier.size(24.dp))
-                }
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(g.title, fontWeight = FontWeight.Bold, color = Navy, fontSize = 17.sp, lineHeight = 24.sp)
-                    Text(when (g.type) {
-                        GuideType.PROGRAMMING -> "دليل برمجة خطوة بخطوة"
-                        GuideType.WIRING -> "دليل التوصيلات"
-                        GuideType.REMOTE -> "دليل إعداد الريموت"
-                        GuideType.INSTALL -> "دليل التركيب"
-                        else -> "دليل فني"
-                    }, color = Color(0xFF64748B), fontSize = 12.sp)
-                }
-            }
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween) {
-                VerificationBadge(g.level)
-                Text(if (steps.isEmpty()) "الخطوات غير مضافة" else "${steps.size} خطوات",
-                    color = Color(0xFF475569), fontSize = 12.sp, fontWeight = FontWeight.Medium)
-            }
-            if (g.summary.isNotBlank()) {
-                Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFFF1F5F9)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("قبل أن تبدأ", color = Navy, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Text(g.summary, color = Color(0xFF334155), fontSize = 14.sp, lineHeight = 22.sp)
-                }
-            }
-            if (g.warnings.isNotBlank()) WarningBox(g.warnings)
-            if (steps.isNotEmpty()) {
-                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFFEFF6FF))
-                    .clickable { expanded = !expanded }.padding(horizontal = 12.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("خطوات التنفيذ", color = Navy, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                    Text(if (expanded) "إخفاء ▲" else "عرض الخطوات ▼", color = NavyLight, fontSize = 12.sp)
-                }
-                if (expanded) steps.forEachIndexed { i, step ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.Top) {
-                        Box(Modifier.size(30.dp).clip(CircleShape).background(Navy), contentAlignment = Alignment.Center) {
-                            Text("${i + 1}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        }
-                        Text(step.text, Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFF8FAFC)).padding(horizontal = 12.dp, vertical = 10.dp),
-                            color = Color(0xFF1E293B), fontSize = 14.sp, lineHeight = 23.sp)
+            // العنوان: الضغط عليه يفتح/يقفل الدليل
+            Row(
+                Modifier.fillMaxWidth().clickable { expanded = !expanded },
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                GuideIcon(style, size = 44)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(g.title, fontWeight = FontWeight.Bold, color = Navy, fontSize = 16.sp, lineHeight = 23.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        VerificationBadge(g.level)
+                        Text(if (steps.isEmpty()) "بدون خطوات" else "${steps.size} خطوات", color = MutedText, fontSize = 12.sp)
                     }
                 }
-            } else {
-                Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFFFFF7ED)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("لا توجد خطوات تفصيلية حتى الآن", color = Color(0xFF9A3412), fontWeight = FontWeight.Bold)
-                    Text("أضف الخطوات من لوحة الإدارة، وراجع كتالوج الشركة المصنّعة قبل تنفيذ أي إعداد.",
-                        color = Color(0xFF7C2D12), fontSize = 13.sp, lineHeight = 20.sp)
-                }
+                Text(if (expanded) "▲" else "▼", color = style.color, fontSize = 14.sp)
             }
-            Text("الصور والمرفقات", color = Navy, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            MediaSection(OwnerType.GUIDE, g.id)
-            if (g.source.isNotBlank()) {
-                Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFF8FAFC)).padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("المصدر الفني", color = Color(0xFF64748B), fontSize = 11.sp)
-                    Text(g.source, color = Color(0xFF334155), fontSize = 12.sp, lineHeight = 18.sp)
+            if (expanded) {
+                BeforeYouStart(g.summary, style)
+                WarningBox(g.warnings)
+                if (steps.isNotEmpty()) {
+                    TermsCard(steps.joinToString("\n") + "\n" + g.summary)
+                    StepsChecklist("block_${g.id}", steps, style.color)
+                } else {
+                    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+                        .background(Color(0xFFFFF7ED)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("لسه مفيش خطوات تفصيلية", color = Color(0xFF9A3412), fontWeight = FontWeight.Bold)
+                        Text("أضف الخطوات من لوحة الإدارة، وراجع كتالوج الشركة المصنّعة قبل تنفيذ أي إعداد.",
+                            color = Color(0xFF7C2D12), fontSize = 13.sp, lineHeight = 20.sp)
+                    }
                 }
-            }
-            Button(onClick = { nav.navigate(Routes.guide(g.id)) }, modifier = Modifier.fillMaxWidth().height(48.dp),
-                shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = Navy)) {
-                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.size(8.dp))
-                Text("فتح الدليل كاملًا", fontWeight = FontWeight.Bold)
+                Text("الصور والمخططات", color = Navy, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                MediaSection(OwnerType.GUIDE, g.id)
+                if (g.source.isNotBlank()) Text("المصدر: ${g.source}", color = MutedText, fontSize = 11.sp, lineHeight = 17.sp)
+                Button(onClick = { nav.navigate(Routes.guide(g.id)) }, modifier = Modifier.fillMaxWidth().height(48.dp),
+                    shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(containerColor = style.color)) {
+                    Text("افتح الدليل في صفحة كاملة", fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
@@ -517,19 +542,19 @@ fun ModelDetailScreen(nav: NavController, id: Long) {
             val remote = d.guides.filter { it.type == GuideType.REMOTE }
             val install = d.guides.filter { it.type == GuideType.INSTALL }
             val tabs = buildList {
-                add("نظرة عامة")
-                add("التوصيلات (${wiring.size})")
-                add("برمجة المكينة (${program.size})")
-                add("برمجة الريموت (${remote.size})")
-                if (install.isNotEmpty()) add("التركيب (${install.size})")
-                add("الأعطال (${d.faults.size})")
-                add("الكتالوج")
+                add(ModelTab("نظرة عامة", Icons.Default.Info, Navy, -1))
+                add(ModelTab("التوصيلات", guideStyle(GuideType.WIRING).icon, WireAmber, wiring.size))
+                add(ModelTab("برمجة المكينة", guideStyle(GuideType.PROGRAMMING).icon, ProgBlue, program.size))
+                add(ModelTab("الريموت", guideStyle(GuideType.REMOTE).icon, RemoteViolet, remote.size))
+                if (install.isNotEmpty()) add(ModelTab("التركيب", guideStyle(GuideType.INSTALL).icon, InstallTeal, install.size))
+                add(ModelTab("الأعطال", Icons.Default.MedicalServices, FaultRose, d.faults.size))
+                add(ModelTab("الكتالوج", Icons.Default.PhotoLibrary, Navy, -1))
             }
             val sel = tab.coerceIn(0, tabs.size - 1)
-            val label = tabs[sel]
+            val label = tabs[sel].label
             val documented = d.guides.any { it.level == Verification.DOCUMENTED }
 
-            Column(Modifier.padding(pad).fillMaxSize().background(Color(0xFFF4F7FB))) {
+            Column(Modifier.padding(pad).fillMaxSize().background(MaterialTheme.colorScheme.background)) {
                 Row(
                     Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(DeepNavy, NavyLight))).padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -550,13 +575,22 @@ fun ModelDetailScreen(nav: NavController, id: Long) {
                         }
                     }
                 }
-                ScrollableTabRow(
-                    selectedTabIndex = sel, edgePadding = 8.dp,
-                    containerColor = Color.White, contentColor = Navy,
+                Row(
+                    Modifier.fillMaxWidth().background(Color.White).horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     tabs.forEachIndexed { i, t ->
-                        Tab(selected = sel == i, onClick = { tab = i }, text = { Text(t, fontWeight = if (sel == i) FontWeight.Bold else FontWeight.Normal) },
-                            selectedContentColor = Navy, unselectedContentColor = Color(0xFF64748B))
+                        val on = sel == i
+                        Row(
+                            Modifier.clip(RoundedCornerShape(50)).background(if (on) t.color else Color(0xFFF1F5F9))
+                                .clickable { tab = i }.padding(horizontal = 14.dp, vertical = 9.dp),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Icon(t.icon, null, tint = if (on) Color.White else t.color, modifier = Modifier.size(18.dp))
+                            Text(t.label, color = if (on) Color.White else Navy, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            if (t.count >= 0) Text("${t.count}", color = if (on) Color.White.copy(alpha = 0.85f) else MutedText, fontSize = 12.sp)
+                        }
                     }
                 }
                 Column(
@@ -579,11 +613,11 @@ fun ModelDetailScreen(nav: NavController, id: Long) {
                                 d.parts.forEach { p -> Text("• ${p.name} ${p.partNumber.ltr()} — المخزون: ${p.quantity}") }
                             }
                         }
-                        label.startsWith("التوصيلات") -> guideTab(nav, wiring, "لا يوجد مخطط توصيل مسجّل لهذا الموديل بعد.")
-                        label.startsWith("برمجة المكينة") -> guideTab(nav, program, "لا توجد خطوات برمجة مسجّلة لهذا الموديل بعد.")
-                        label.startsWith("برمجة الريموت") -> guideTab(nav, remote, "لا توجد خطوات برمجة ريموت مسجّلة لهذا الموديل بعد.")
-                        label.startsWith("التركيب") -> guideTab(nav, install, "")
-                        label.startsWith("الأعطال") -> {
+                        label == "التوصيلات" -> guideTab(nav, wiring, "لا يوجد مخطط توصيل مسجّل لهذا الموديل بعد.")
+                        label == "برمجة المكينة" -> guideTab(nav, program, "لا توجد خطوات برمجة مسجّلة لهذا الموديل بعد.")
+                        label == "الريموت" -> guideTab(nav, remote, "لا توجد خطوات برمجة ريموت مسجّلة لهذا الموديل بعد.")
+                        label == "التركيب" -> guideTab(nav, install, "")
+                        label == "الأعطال" -> {
                             if (d.faults.isEmpty()) Text("لا توجد أعطال مسجلة لهذا الموديل.", color = Color(0xFF64748B))
                             d.faults.forEach { f ->
                                 Row(
@@ -626,10 +660,13 @@ private fun guideTab(nav: NavController, list: List<TechnicalGuide>, empty: Stri
         Text(empty, color = Color(0xFF64748B))
         Text("يمكنك إضافتها من لوحة الإدارة أو البحث بالإنترنت (ذكاء اصطناعي).", color = Color(0xFF64748B), fontSize = 12.sp)
     }
-    list.forEach { g -> GuideBlock(nav, g) }
+    // أول دليل مفتوح، والباقي مقفول عشان الصفحة تبقى مرتبة وسهلة التصفح.
+    list.forEachIndexed { i, g -> GuideBlock(nav, g, startOpen = i == 0) }
 }
 
 // ======================= لوحة الإدارة =======================
+
+private data class ModelTab(val label: String, val icon: ImageVector, val color: Color, val count: Int)
 
 private data class AdminEntry(val label: String, val icon: ImageVector, val route: String)
 
@@ -648,7 +685,7 @@ fun AdminScreen(nav: NavController) {
     )
     Scaffold(topBar = { HamoTopBar("لوحة الإدارة", onBack = { nav.popBackStack() }) }) { pad ->
         Column(
-            Modifier.padding(pad).fillMaxSize().background(Color(0xFFF4F7FB)).verticalScroll(rememberScrollState()).padding(14.dp),
+            Modifier.padding(pad).fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             entries.chunked(3).forEach { row ->

@@ -1,5 +1,34 @@
 package com.hamo.doortech.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.hamo.doortech.data.db.TechnicalGuide
+import com.hamo.doortech.ui.components.BeforeYouStart
+import com.hamo.doortech.ui.components.Chip
+import com.hamo.doortech.ui.components.GuideIcon
+import com.hamo.doortech.ui.components.StepsChecklist
+import com.hamo.doortech.ui.components.TermsCard
+import com.hamo.doortech.ui.components.guideStyle
+import com.hamo.doortech.ui.theme.MutedText
+import com.hamo.doortech.ui.theme.Navy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -69,23 +98,86 @@ fun GuidesScreen(nav: NavController, type: String) {
     val state by vm.guides.collectAsStateWithLifecycle()
     val names by vm.names.collectAsStateWithLifecycle()
     val n = (names as? UiState.Success)?.value
+    val style = guideStyle(type)
+    var query by remember { mutableStateOf("") }
+    var brand by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
-        topBar = { HamoTopBar(GuideType.label(type), onBack = { nav.popBackStack() }) },
+        topBar = { HamoTopBar(style.title, onBack = { nav.popBackStack() }) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { nav.navigate(Routes.guideEdit(0, type)) }, icon = { Icon(Icons.Default.Add, null) }, text = { Text("إضافة") })
+            ExtendedFloatingActionButton(
+                onClick = { nav.navigate(Routes.guideEdit(0, type)) }, icon = { Icon(Icons.Default.Add, null) }, text = { Text("إضافة") },
+                containerColor = style.color, contentColor = Color.White,
+            )
         },
     ) { pad ->
-        Column(Modifier.padding(pad).fillMaxSize()) {
+        Column(Modifier.padding(pad).fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             StateContent(state, "لا توجد أدلة", "أضف أول دليل في هذا القسم.", isEmpty = { it.isEmpty() }) { list ->
-                LazyColumn(contentPadding = PaddingValues(14.dp, 14.dp, 14.dp, 90.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(list, key = { it.id }) { g ->
-                        ListCard(
-                            title = g.title,
-                            subtitle = listOfNotNull(n?.category(g.categoryId), n?.modelName(g.modelId)?.ltr()).joinToString(" • ").ifBlank { "عام" },
-                            badges = { if (g.isSeed) SeedBadge(); VerificationBadge(g.level) },
-                            onClick = { nav.navigate(Routes.guide(g.id)) },
+                val brandOf = { g: TechnicalGuide -> n?.brandOfModel(g.modelId) ?: "عام" }
+                val brands = list.map(brandOf).distinct().sorted()
+                val q = query.trim().lowercase()
+                val shown = list.filter { g ->
+                    (brand == null || brandOf(g) == brand) &&
+                        (q.isEmpty() || g.title.lowercase().contains(q) || (n?.modelName(g.modelId)?.lowercase()?.contains(q) == true))
+                }
+                LazyColumn(contentPadding = PaddingValues(16.dp, 12.dp, 16.dp, 96.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    item {
+                        Row(
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp))
+                                .background(Brush.linearGradient(listOf(style.color, style.color.copy(alpha = 0.75f))))
+                                .padding(18.dp),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        ) {
+                            Box(Modifier.size(54.dp).clip(RoundedCornerShape(18.dp)).background(Color.White.copy(alpha = 0.2f)), contentAlignment = Alignment.Center) {
+                                Icon(style.icon, null, tint = Color.White, modifier = Modifier.size(30.dp))
+                            }
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(style.title, color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                                Text(style.hint, color = Color.White.copy(alpha = 0.9f), fontSize = 13.sp)
+                                Text("${list.size} دليل • ${brands.size} شركة", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+                    }
+                    item {
+                        OutlinedTextField(
+                            value = query, onValueChange = { query = it }, singleLine = true,
+                            placeholder = { Text("ابحث باسم الموديل أو الدليل...") },
+                            leadingIcon = { Icon(Icons.Default.Search, null) },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
+                            modifier = Modifier.fillMaxWidth(),
                         )
+                    }
+                    if (brands.size > 1) item {
+                        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FilterChip(selected = brand == null, onClick = { brand = null }, label = { Text("الكل") },
+                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = style.color, selectedLabelColor = Color.White))
+                            brands.forEach { b ->
+                                FilterChip(selected = brand == b, onClick = { brand = if (brand == b) null else b }, label = { Text(b.ltr()) },
+                                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = style.color, selectedLabelColor = Color.White))
+                            }
+                        }
+                    }
+                    if (shown.isEmpty()) item {
+                        Text("مفيش نتائج. جرّب كلمة تانية أو اختار «الكل».", color = MutedText, modifier = Modifier.padding(8.dp))
+                    }
+                    items(shown, key = { it.id }) { g ->
+                        Row(
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color.White)
+                                .clickable { nav.navigate(Routes.guide(g.id)) }.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            GuideIcon(style)
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(g.title, color = Navy, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 22.sp)
+                                Text(
+                                    listOfNotNull(brandOf(g).ltr(), n?.modelName(g.modelId)?.ltr(), n?.category(g.categoryId)).distinct().joinToString(" • "),
+                                    color = MutedText, fontSize = 12.sp,
+                                )
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { if (g.isSeed) SeedBadge(); VerificationBadge(g.level) }
+                            }
+                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null, tint = Color(0xFF94A3B8))
+                        }
                     }
                 }
             }
@@ -103,7 +195,7 @@ fun GuideDetailScreen(nav: NavController, id: Long) {
     var confirmDelete by remember { mutableStateOf(false) }
 
     Scaffold(topBar = {
-        HamoTopBar("تفاصيل الدليل", onBack = { nav.popBackStack() }) {
+        HamoTopBar("الدليل", onBack = { nav.popBackStack() }) {
             IconButton(onClick = vm::toggleFavorite) { Icon(if (fav) Icons.Default.Star else Icons.Default.StarBorder, "مفضلة") }
             IconButton(onClick = { nav.navigate(Routes.guideEdit(id)) }) { Icon(Icons.Default.Edit, "تعديل") }
             IconButton(onClick = {
@@ -118,24 +210,46 @@ fun GuideDetailScreen(nav: NavController, id: Long) {
         StateContent(state, isEmpty = { it == null }, emptyTitle = "الدليل غير موجود") { d ->
             if (d == null) return@StateContent
             val g = d.full.guide
-            ScrollColumn(pad) {
-                SectionCard(g.title) {
+            val style = guideStyle(g.type)
+            val steps = d.full.orderedSteps.map { it.text }
+            Column(
+                Modifier.padding(pad).fillMaxSize().background(MaterialTheme.colorScheme.background)
+                    .verticalScroll(rememberScrollState()).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                // رأس الدليل: القسم والعنوان والموديل في بطاقة ملونة واحدة.
+                Column(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp))
+                        .background(Brush.linearGradient(listOf(style.color, style.color.copy(alpha = 0.75f)))).padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(style.icon, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                        Text(style.title, color = Color.White.copy(alpha = 0.9f), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                    Text(g.title, color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, lineHeight = 28.sp)
+                    val where = listOfNotNull(d.brandName?.ltr(), d.modelName?.ltr(), d.categoryName).joinToString(" • ")
+                    if (where.isNotBlank()) Text(where, color = Color.White.copy(alpha = 0.9f), fontSize = 13.sp)
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         if (g.isSeed) SeedBadge()
                         VerificationBadge(g.level)
+                        if (steps.isNotEmpty()) Chip("${steps.size} خطوات", Color.White.copy(alpha = 0.2f), Color.White)
                     }
-                    InfoRow("القسم", GuideType.singular(g.type))
-                    InfoRow("نوع الباب", d.categoryName.orEmpty())
-                    InfoRow("الشركة", d.brandName.orEmpty().ltr())
-                    InfoRow("الموديل", d.modelName.orEmpty().ltr())
-                    InfoRow("الملخص", g.summary)
-                    InfoRow("المصدر", g.source)
                 }
+                BeforeYouStart(g.summary, style)
                 WarningBox(g.warnings)
-                SectionCard("الخطوات") {
-                    d.full.orderedSteps.forEachIndexed { i, s -> NumberedStep(i + 1, s.text) }
+                TermsCard(steps.joinToString("\n") + "\n" + g.summary)
+                if (steps.isNotEmpty()) {
+                    Text("الخطوات", color = Navy, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+                    StepsChecklist("guide_$id", steps, style.color)
+                } else {
+                    EmptyState("لسه مفيش خطوات", "أضف الخطوات من زر التعديل، وراجع كتالوج الشركة قبل أي ضبط.")
                 }
+                Text("الصور والمخططات", color = Navy, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
                 MediaSection(OwnerType.GUIDE, id)
+                if (g.source.isNotBlank()) {
+                    Text("المصدر: ${g.source}", color = MutedText, fontSize = 12.sp, lineHeight = 18.sp)
+                }
             }
         }
     }
